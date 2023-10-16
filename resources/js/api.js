@@ -81,4 +81,9 @@ export default {
             return response.data;
         });
     },
+    fetchBooks(){
+        return apiClient.get("/get-books").then(function (response) {
+            return response.data;
+        });
+    },
 };

@@ -24,7 +24,7 @@
                 <input
                   type="text"
                   class="form-control"
-                  placeholder="Search by title/ isbn/ genre. (Type and Enter)"
+                  placeholder="Search by book title/name. (Type and Enter)"
                   v-model="search"
                 />
                 <button @click="downloadFile" class="btn my-btn-success export-btn">
@@ -94,7 +94,6 @@
                         >↓</span
                       >
                     </th>
-                    <th class="text-center">Photo</th>
                     <th scope="col">
                       <a href="#" @click.prevent="changeShort('title')"> Title</a>
                       <!-- <a href="#">Name</a> -->
@@ -113,12 +112,8 @@
                         >↓</span
                       >
                     </th>
-                    <th class="text-center text-nowrap" scope="col">Publisher</th>
-                    <th class="text-center text-nowrap" scope="col">Author</th>
-                    <th class="text-center text-nowrap" scope="col">Category</th>
-                    <th class="text-center text-nowrap" scope="col">Sub Category</th>
                     <th class="text-center text-nowrap" scope="col">
-                      <a href="#" @click.prevent="changeShort('stock_quantity')"
+                      <a href="#" @click.prevent="changeShort('quantity')"
                         >Damage Qty.</a
                       >
                       <span
@@ -136,6 +131,8 @@
                         >↓</span
                       >
                     </th>
+
+                    <th class="text-center text-nowrap" scope="col">Created At</th>
                     <th class="text-center text-nowrap" scope="col">Action</th>
                   </tr>
                   <tr>
@@ -159,7 +156,7 @@
                         v-model="params.damage_date"
                       />
                     </th>
-                    <th colspan="2" class="text-nowarp px-1">
+                    <th colspan="1" class="text-nowarp px-1">
                       <input
                         type="text"
                         placeholder="Search By Book Title"
@@ -169,84 +166,20 @@
                       />
                     </th>
                     <th class="text-nowarp px-1">
-                      <select
-                        v-model="params.publisher_id"
-                        style="width: 100%"
-                        class="form-select-sm"
-                      >
-                        <option value="" selected>--select publisher--</option>
-                        <option
-                          :value="publisher.id"
-                          v-for="publisher in publishers"
-                          :key="publisher.id"
-                        >
-                          {{ publisher.publisher_name }}
-                        </option>
-                      </select>
-                    </th>
-                    <th class="text-nowarp px-1">
-                      <select
-                        v-model="params.author_id"
-                        style="width: 100%"
-                        class="form-select-sm"
-                      >
-                        <option value="" selected>--select author--</option>
-                        <option
-                          :value="author.id"
-                          v-for="author in authors"
-                          :key="author.id"
-                        >
-                          {{ author.author_name }}
-                        </option>
-                      </select>
-                    </th>
-                    <th class="text-nowarp px-1">
-                      <select
-                        v-model="params.category_id"
-                        class="form-select-sm"
-                        @change="getSubCategories"
-                        style="width: 100%"
-                      >
-                        <option value="" selected>--select category--</option>
-                        <option
-                          :value="category.id"
-                          v-for="category in categories"
-                          :key="category.id"
-                        >
-                          {{ category.category_name }}
-                        </option>
-                      </select>
-                    </th>
-                    <th class="text-nowarp px-1">
-                      <select
-                        v-model="params.sub_category_id"
-                        class="form-select-sm"
-                        style="width: 100%"
-                      >
-                        <option value="" selected>--select sub-category--</option>
-                        <option
-                          :value="subcategory.id"
-                          v-for="subcategory in sub_categories"
-                          :key="subcategory.id"
-                        >
-                          {{ subcategory.sub_category_name }}
-                        </option>
-                      </select>
-                    </th>
-                    <th class="text-nowarp px-1">
                       <input
                         type="text"
                         placeholder="Search By Qty"
                         class=""
                         style="width: 100%"
-                        v-model="params.stock_quantity"
+                        v-model="params.quantity"
                       />
                     </th>
                     <th></th>
+                    <th></th>
                   </tr>
                 </thead>
-                <tbody v-if="books && paginator.totalRecords > 0">
-                  <tr v-for="book in damage_items.data" :key="damage_item.id">
+                <tbody v-if="damageItems && paginator.totalRecords > 0">
+                  <tr v-for="(damage_item,index) in damageItems.data" :key="damage_item.id">
                     <!-- <td class="text-center">
                       <input
                         type="checkbox"
@@ -258,34 +191,21 @@
                     <td style="width: 60px !important" class="text-nowrap">
                       {{ damage_item.id }}
                     </td>
-                    <td>
-                      <img
-                        :src="
-                          `${publicPath}assets/img/book/thumbnail/` + damage_item.photo
-                        "
-                        alt=""
-                        width="30"
-                      />
+                    <td style="width: 60px !important" class="text-nowrap">
+                      {{ damage_item.damage_date }}
                     </td>
+              
                     <td class="text-nowrap">
                       <a
                         @click="openModal(damage_item.id)"
                         href="#"
                         data-toggle="modal"
                         data-target="#recordModal"
-                        >{{ damage_item.title }}</a
+                        >{{ damage_item.book.title }}</a
                       >
                     </td>
-                    <td class="text-nowrap">
-                      {{ damage_item.publisher.publisher_name }}
-                    </td>
-                    <td class="text-nowrap">{{ damage_item.author.author_name }}</td>
-                    <td class="text-nowrap">{{ damage_item.category.category_name }}</td>
-                    <td class="text-nowrap">
-                      {{ damage_item.sub_category.sub_category_name }}
-                    </td>
-                    <td class="text-nowrap">{{ damage_item.stock_quantity }}</td>
-                    <td class="text-nowrap">{{ damage_item.price }}</td>
+                    <td class="text-nowrap text-center">{{ damage_item.quantity }}</td>
+                    <td class="text-nowrap text-center">{{ damage_item.created_at }}</td>
 
                     <td class="text-right text-nowrap">
                       <div class="btn-group" option="group">
@@ -342,7 +262,7 @@
               <div class="col-md-6">
                 <pagination
                   align="right"
-                  :data="books"
+                  :data="damageItems"
                   :limit="5"
                   @pagination-change-page="getDamageItems"
                 ></pagination>
@@ -381,20 +301,18 @@ export default {
         current_page: "",
         per_page: "",
       },
-      books: {
+      damageItems: {
         type: Object,
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 6,
         id: "",
         title: "",
-        publisher_id: "",
-        author_id: "",
-        category_id: "",
-        sub_category_id: "",
+        damage_date: "",
+        quantity: "",
         sort_field: "created_at",
-        sort_direction: "desc",
+        sort_direction: "desc"
       },
       search: "",
       isLoading: false,
@@ -403,17 +321,6 @@ export default {
     };
   },
   async created() {
-    this.fetchCategories();
-    this.authors = this.$store.getters.getAuthors;
-    if (this.authors.length == 0) {
-      const response = await axios.get("/api/get-authors");
-      this.authors = response.data;
-    }
-    this.publishers = this.$store.getters.getPublishers;
-    if (this.publishers.length == 0) {
-      const response = await axios.get("/api/get-publishers");
-      this.publishers = response.data;
-    }
   },
   mounted() {
     this.filterFields = { ...this.params };
@@ -432,15 +339,12 @@ export default {
       deep: true,
     },
     search(val, old) {
-      if (val.length >= 3 || old.length >= 3) {
+      if (val.length >= 3 || old.length >= 3) {       
         this.getDamageItems();
       }
     },
   },
   computed: {
-    categories() {
-      return this.$store.state.categories;
-    },
   },
   methods: {
     ...mapActions(["fetchCategories"]),
@@ -459,7 +363,7 @@ export default {
         .then((response) => {
           // console.log(response);
           this.isLoading = false;
-          this.books = response.data;
+          this.damageItems = response.data;
           this.paginator.totalRecords = response.data.total;
           // if (response.data.total <= 0) {
           //   document.querySelector(".loading-section").innerText = "No Record Found!.";
@@ -499,7 +403,7 @@ export default {
     },
     refreshData() {
       this.isRefreshing = true;
-      this.params = { ...this.filterFields };
+      // this.params = { ...this.filterFields };
       this.getDamageItems();
     },
     changeShort(field) {

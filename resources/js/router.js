@@ -104,6 +104,9 @@ import CategoryWiseSaleReport from "./components/report/sale/CategoryWiseSale.vu
 import CustomerWiseSaleReport from "./components/report/sale/CustomerWiseSale.vue";
 
 import PurchaseReport from "./components/report/purchase/Index.vue";
+import CategoryWisePurchaseReport from "./components/report/purchase/CategoryWisePurchase.vue";
+import SupplierWisePurchaseReport from "./components/report/purchase/SupplierWisePurchase.vue";
+
 import StockReport from "./components/report/stock/Index.vue";
 import StockAlertReport from "./components/report/stock_alert/Index.vue";
 import DamageItemReport from "./components/report/damage_item/Index.vue";
@@ -965,6 +968,28 @@ export const routes = [
         name: "reports/purchase",
         meta: {
             title: "Report | Purchase",
+            requiresAuth: true,
+            requiredPermissions: ["report.purchase"],
+        },
+        beforeEnter: guard,
+    },
+    {
+        path: "/reports/purchase/supplier-wise-purchase",
+        component: SupplierWisePurchaseReport,
+        name: "reports/purchase/supplier-wise-purchase",
+        meta: {
+            title: "Report | Supplier Wise Purchase",
+            requiresAuth: true,
+            requiredPermissions: ["report.purchase"],
+        },
+        beforeEnter: guard,
+    },
+    {
+        path: "/reports/purchase/category-wise-purchase",
+        component: CategoryWisePurchaseReport,
+        name: "reports/purchase/category-wise-purchase",
+        meta: {
+            title: "Report | Category Wise Purchase",
             requiresAuth: true,
             requiredPermissions: ["report.purchase"],
         },

@@ -248,7 +248,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 6,
         id: "",
         name: "",
         group_name: "",

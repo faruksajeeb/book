@@ -66,7 +66,7 @@ class PermissionController extends Controller
         // $permissions = $query->paginate(8);
         // return view('permission.index', compact('permissions'));
         try {
-            $paginate = request('paginate', 5);
+            $paginate = request('paginate', 6);
             $searchTerm = request('search', '');
 
             $sortField = request('sort_field', 'created_at');

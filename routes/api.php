@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\PosController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SalaryController;
 use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\DamageItemController;
 
 use App\Http\Controllers\Api\Reports\CustomerPaymentReportController;
 use App\Http\Controllers\Api\Reports\SaleReportController;
@@ -61,6 +62,7 @@ Route::group([
 });
 
 Route::middleware('JWT')->group(function () {
+    Route::get('get-books', [BookController::class, 'getBooks']);
     Route::get('get-categories', [CategoryController::class, 'getCategories']);
     Route::get('get-option-groups', [OptionGroupController::class, 'getOptionGroups']);
     Route::get('get-roles', [RoleController::class, 'getRoles']);
@@ -120,6 +122,10 @@ Route::middleware('JWT')->group(function () {
     Route::apiResource('/manage-employee', EmployeeController::class);
     Route::apiResource('/manage-product', ProductController::class);
     Route::apiResource('/manage-expense', ExpenseController::class);
+    
+    # Damage Item
+    Route::apiResource('/damage-items', DamageItemController::class);
+    Route::post('/damage-items/{id}',[DamageItemController::class,'update']);
 
     Route::get('category-export', [CategoryController::class, 'export'])->name('category.export');
     Route::get('category-export-pdf', [CategoryController::class, 'exportPdf'])->name('category.export.pdf');

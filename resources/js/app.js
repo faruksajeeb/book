@@ -1,6 +1,7 @@
 import "./bootstrap";
 
 import { createApp } from "vue";
+
 import App from "./App.vue";
 
 // pagination
@@ -86,4 +87,5 @@ app.component("AlertError", AlertError);
 app.use(VueProgressBar, options);
 app.use(router);
 app.use(store);
+
 app.mount("#app");

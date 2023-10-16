@@ -40,7 +40,7 @@
                       <div class="row">
                         <!-- <div v-if="permissions.length > 0"> -->
                         <div
-                          class="col-md-3 py-2"
+                          class="col-md-3 border-top py-2"
                           v-for="(group, groupName) in permissions"
                           :key="groupName"
                         >

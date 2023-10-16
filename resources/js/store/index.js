@@ -19,6 +19,7 @@ const store = createStore({
             suppliers: [],
             customers: [],
             payment_methods: [],
+            books: [],
             user: {
                 permissions: userPermissions,
             },
@@ -100,6 +101,9 @@ const store = createStore({
         setCategories(state, categories) {
             state.categories = categories;
         },
+        setBooks(state, books) {
+            state.books = books;
+        },
     },
     actions: {
         fetchUserPermissions({ commit }) {
@@ -130,6 +134,12 @@ const store = createStore({
             // e.g., using axios or fetch
             api.fetchCategories().then((categories) => {
                 commit("setCategories", categories);
+            });
+        },
+        fetchBooks({ commit }) {
+            // e.g., using axios or fetch
+            api.fetchBooks().then((books) => {
+                commit("setBooks", books);
             });
         },
     },

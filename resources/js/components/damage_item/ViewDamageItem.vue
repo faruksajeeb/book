@@ -17,66 +17,29 @@
         <div class="modal-body">
           <!-- Display record details here -->
          
-          <div v-if="record.author">
-            <h4>Book Title: {{ record.title }}</h4>
-            <div class="row">
-              <div class="col-md-4">
-                <img
-                  :src="`${publicPath}assets/img/book/`+record.photo"
-                  alt="Cutomer Photo"
-                  width="250"
-                  class="img-fluid"
-                />
-              </div>
+          <div v-if="record.book">
+            <div class="row">             
               <div class="col-md-8">
                 <table class="table table-sm">
                   <tr>
-                    <td>ISBN</td>
-                    <td>{{ record.isbn }}</td>
+                    <td>Damage Item</td>
+                    <td>{{ record.book.title }}</td>
                   </tr>
                   <tr>
-                    <td>Author</td>
-                    <td>{{ record.author.author_name }}</td>
+                    <td>Damage Date</td>
+                    <td>{{ record.damage_date }}</td>
                   </tr>
                   <tr>
-                    <td>Publisher</td>
-                    <td>{{ record.publisher.publisher_name }}</td>
+                    <td>Damage Quantity</td>
+                    <td>{{ record.quantity }}</td>
                   </tr>
                   <tr>
-                    <td>Category</td>
-                    <td>{{ record.category.category_name }}</td>
+                    <td>Created At</td>
+                    <td>{{ record.created_at }}</td>
                   </tr>
                   <tr>
-                    <td>Sub Category</td>
-                    <td>{{ record.sub_category.sub_category_name }}</td>
-                  </tr>
-                  <tr>
-                    <td>Genre</td>
-                    <td>{{ record.genre }}</td>
-                  </tr>
-                  <tr>
-                    <td>Price</td>
-                    <td>{{ record.price }}</td>
-                  </tr>
-                  <tr>
-                    <td>Publication Year</td>
-                    <td>{{ record.publication_year }}</td>
-                  </tr>
-                  <tr>
-                    <td>Buying Discount Percentage</td>
-                    <td>{{ record.buying_discount_percentage }} %</td>
-                  </tr>
-                  <tr>
-                    <td>Selling Discount Percentage</td>
-                    <td>{{ record.selling_discount_percentage }} %</td>
-                  </tr>
-                  <tr>
-                    <td>Buying Vat Percentage</td>
-                    <td>{{ record.buying_vat_percentage }} %</td>
-                  </tr>
-                  <tr>
-                    <td>Selling Vat Percentage</td>
-                    <td>{{ record.selling_vat_percentage }} %</td>
+                    <td>Updated At</td>
+                    <td>{{ record.updated_at }}</td>
                   </tr>
                 </table>
               </div>
@@ -100,7 +63,7 @@
 export default {
     data(){
         return{            
-            publicPath:window.publicPath,
+            
         }
     },
     props: {

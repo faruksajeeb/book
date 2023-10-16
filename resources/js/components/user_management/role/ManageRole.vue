@@ -133,7 +133,7 @@
                     <td style="width: 20px" class="text-nowrap">{{ role.id }}</td>
                     <td>{{ role.name }}</td>
                     <td>
-                      <transition name="fade" mode="out-in">
+                     
                       <div class="text-dark text-start p-1 m-1">
                         <!-- {{
                           role.permissions
@@ -141,13 +141,16 @@
                             .map((permission) => permission.name)
                             .join(", ")
                         }} -->
+                        <transition name="fade" >
+                          <div >
                         <span
                           class="badge bg-info text-dark text-start p-1 m-1"
                           v-for="permission in role.permissions.slice(0, 5)"
                           :key="permission.id"
                         >
                           {{ permission.name }}
-                        </span>
+                        </span></div>
+                      </transition>
                         <div
                           v-if="role.permissions.length > 5 && !role.showAllPermissions"
                         >
@@ -174,7 +177,7 @@
                           <a href="#" @click="toggleShowPermissions(role)">Show Less</a>
                         </div>
                       </div>
-                    </transition>
+                 
                       <!-- <span
                         class="badge bg-info text-dark text-start p-1 m-1"
                         v-for="permission in role.permissions"
@@ -457,9 +460,9 @@ export default {
   width: 40px;
 }
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
+  transition: 2s;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
   opacity: 0;
 }
 </style>
