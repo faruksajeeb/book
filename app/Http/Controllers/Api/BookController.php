@@ -133,6 +133,7 @@ class BookController extends Controller
                     $input['photo'] = $imageName;
                 }
             }
+            $input['author_id'] = implode(",",$request->author_id);
             $input['created_by'] = $this->webspice->getUserId();
             // dd($input);
             $this->books->create($input);
@@ -221,7 +222,7 @@ class BookController extends Controller
                     $input['photo'] = $imageName;
                 }
             }
-
+            $input['author_id'] = implode(",",$request->author_id);
             $input['updated_by'] = $this->webspice->getUserId();
             Book::where('id', $id)->update($input);
         } catch (Exception $e) {

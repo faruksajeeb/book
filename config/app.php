@@ -71,7 +71,8 @@ return [
 
     // 'timezone' => 'UTC',
     'timezone' => 'Asia/Dhaka',
-
+    'charset' => 'UTF-8',
+    'collation' => 'utf8_unicode_ci',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
@@ -187,6 +188,8 @@ return [
         /*
          * Package Service Providers...
          */
+        
+        Mccarlosen\LaravelMpdf\LaravelMpdfServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
@@ -215,7 +218,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
-        'PDF' => Barryvdh\DomPDF\Facade::class,
+        //'MPDF' => Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::class,
+        // 'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'Image' => Intervention\Image\Facades\Image::class
     ])->toArray(),

@@ -216,6 +216,7 @@ export default {
     };
   },
   async created() {
+    this.fetchCategories();
     this.customers = this.$store.getters.getCustomers;
     if (this.customers.length == 0) {
       const response = await axios.get("/api/get-customers");

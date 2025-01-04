@@ -489,7 +489,7 @@ class SaleController extends Controller
             }
         }
         $regularItemsToRemoveIds = $regularItemExistingSaleDetails->whereIn('book_id', $regularItemsToRemoveBookIds)->pluck('id')->toArray();
-#   dd($regularItemsToRemoveIds);
+
         SaleDetail::whereIn('id', $regularItemsToRemoveIds)->delete();
 
         if ($request->cart_items) {
@@ -590,7 +590,7 @@ class SaleController extends Controller
             }
         }
         $courtesyItemsToRemoveIds = $courtesyItemExistingSaleDetails->whereIn('book_id', $courtesyItemsToRemoveBookIds)->pluck('id')->toArray();
-#       dd($courtesyItemsToRemoveIds);
+
         SaleDetail::whereIn('id', $courtesyItemsToRemoveIds)->delete();
         if ($request->courtesy_cart_items) {
             foreach ($request->courtesy_cart_items as $detailData) {

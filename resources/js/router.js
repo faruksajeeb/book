@@ -114,24 +114,33 @@ import IncomeStatementReport from "./components/report/income_statement/Index.vu
 import ActivityLogReport from "./components/report/activity_log/Index.vue";
 
 function guard(to, from, next) {
-    // or however you store your logged in state
     if (User.loggedIn()) {
-        // Check if the route requires authentication
-        if (to.meta.requiresAuth) {
-            // Check if the user has the required permissions
-            if (store.getters.hasPermission(to.meta.requiredPermissions)) {
-                next();
-            } else {
-                // Redirect to a permission denied page or show an error
-                next("/permission-denied");
-            }
+      if (to.meta.requiresAuth) {
+        // Fetch permissions if not already fetched
+        if (store.state.permissions.length === 0) {
+          store.dispatch('fetchUserPermissions').then(() => {
+            checkPermissions(to, next);
+          });
         } else {
-            next();
+          checkPermissions(to, next);
         }
+      } else {
+        next(); // Route does not require authentication
+      }
     } else {
-        next("/"); // go to '/login';
+      next("/"); // Redirect to login page
     }
-}
+  }
+  
+  function checkPermissions(to, next) {
+    const requiredPermissions = to.meta.requiredPermissions || [];
+    if (store.getters.hasPermission(requiredPermissions)) {
+      next();
+    } else {
+      next("/permission-denied"); // Redirect if permission is missing
+    }
+  }
+  
 export const routes = [
     {
         name: "permission-denied",
@@ -189,7 +198,7 @@ export const routes = [
         meta: {
             title: "Create Role",
             requiresAuth: true,
-            requiredPermissions: ["role.create"],
+           requiredPermissions: ["role.create"],
         },
         beforeEnter: guard,
     },

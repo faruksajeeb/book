@@ -7,7 +7,7 @@ use App\Lib\Webspice;
 use App\Models\Book;
 use App\Models\Customer;
 use App\Models\CustomerPayment;
-use App\Models\DamageItem;
+use App\Models\DamagedItem;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +15,7 @@ use Illuminate\Validation\Rule;
 use PDF;
 // use Image;
 
-class DamageItemController extends Controller
+class DamagedItemController extends Controller
 {
     public $webspice;
     protected $damageItem;
@@ -23,7 +23,7 @@ class DamageItemController extends Controller
     protected $damageItemId;
     public $tableName;
 
-    public function __construct(DamageItem $damageItem, Webspice $webspice)
+    public function __construct(DamagedItem $damageItem, Webspice $webspice)
     {
         $this->webspice = $webspice;
         $this->damageItems = $damageItem;
@@ -60,7 +60,7 @@ class DamageItemController extends Controller
                 'title'
             ]));
 
-            $damageItems = DamageItem::with(['book'])->when(count($filled) > 0, function ($query) use ($filled) {
+            $damageItems = DamagedItem::with(['book'])->when(count($filled) > 0, function ($query) use ($filled) {
                 foreach ($filled as $column => $value) {
                     if ($column == 'damage_date') {
                         if (strpos($value, 'to')) {
@@ -111,7 +111,7 @@ class DamageItemController extends Controller
 
             $input = $request->all();
             $input['created_by'] = $this->webspice->getUserId();
-            $inserted = DamageItem::create($input);
+            $inserted = DamagedItem::create($input);
             $damageItemId = $inserted->id;
 
             if ($damageItemId) {
@@ -149,7 +149,7 @@ class DamageItemController extends Controller
     public function show($id)
     {
         try {
-            $damageItem = DamageItem::with(['book'])->find($id);
+            $damageItem = DamagedItem::with(['book'])->find($id);
             return $damageItem;
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
@@ -181,7 +181,7 @@ class DamageItemController extends Controller
             // $input = $request->all();
             // Begin a database transaction
             \DB::beginTransaction();
-            $oldRecord = DamageItem::find($id);
+            $oldRecord = DamagedItem::find($id);
             if (!$oldRecord) {
                 // Handle if the invoice does not exist
                 \DB::rollBack();
@@ -283,7 +283,7 @@ class DamageItemController extends Controller
         try {
             #decrypt value
             $id = $this->webspice->encryptDecrypt('decrypt', $id);
-            $damageItem = DamageItem::withTrashed()->findOrFail($id);
+            $damageItem = DamagedItem::withTrashed()->findOrFail($id);
             $damageItem->forceDelete();
         } catch (Exception $e) {
             $this->webspice->message('error', $e->getMessage());
@@ -296,7 +296,7 @@ class DamageItemController extends Controller
         $this->webspice->permissionVerify('damage_item.restore');
         try {
             $id = $this->webspice->encryptDecrypt('decrypt', $id);
-            $damageItem = DamageItem::withTrashed()->findOrFail($id);
+            $damageItem = DamagedItem::withTrashed()->findOrFail($id);
             $damageItem->restore();
         } catch (Exception $e) {
             $this->webspice->message('error', $e->getMessage());
@@ -310,7 +310,7 @@ class DamageItemController extends Controller
         #permission verfy
         $this->webspice->permissionVerify('damage_item.restore');
         try {
-            $damageItems = DamageItem::onlyTrashed()->get();
+            $damageItems = DamagedItem::onlyTrashed()->get();
             foreach ($damageItems as $damageItem) {
                 $damageItem->restore();
             }
@@ -323,7 +323,7 @@ class DamageItemController extends Controller
 
     public function getDamageItems()
     {
-        $data = DamageItem::where('status', 1)->get();
+        $data = DamagedItem::where('status', 1)->get();
         return response()->json($data);
     }
 
@@ -333,7 +333,7 @@ class DamageItemController extends Controller
             // dd('hello');
             ini_set('max_execution_time', 30 * 60); //30 min
             ini_set('memory_limit', '2048M');
-            $damageItem = DamageItem::with('customer')->find($id);
+            $damageItem = DamagedItem::with('customer')->find($id);
             // $damageItemRegularDetails = DamageItemDetail::with(['book'])->where('DamageItem_id', $id)->where('flag', 'regular_item')->get();
             $damageItemRegularDetails = DamageItemDetail::leftJoin('books', 'DamageItem_details.book_id', '=', 'books.id')
                 ->select('books.id', 'books.title', 'DamageItem_details.unit_price as price', 'DamageItem_details.quantity', 'DamageItem_details.sub_total')

@@ -33,8 +33,8 @@
                 <div class="col-md-2">
                   <label for="" class="me-3">Per Page: </label>
                   <select v-model="params.paginate" id="" class="py-2">
-                    <option value="5" selected>5</option>
-                    <option value="10">10</option>
+                    <option value="5" >5</option>
+                    <option value="10" selected>10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -112,8 +112,8 @@
                         >↓</span
                       >
                     </th>
-                    <th class="text-right">Permission Group</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-left">Permission Group</th>
+                    <th class="text-center">Action</th>
                   </tr>
                   <tr>
                     <th></th>
@@ -248,7 +248,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 6,
+        paginate: 10,
         id: "",
         name: "",
         group_name: "",

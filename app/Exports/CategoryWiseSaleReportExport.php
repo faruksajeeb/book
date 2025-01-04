@@ -41,7 +41,7 @@ class CategoryWiseSaleReportExport implements FromArray, WithHeadings, Responsab
             ],
             'alignment' => [
                 // 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::FORIZONTAL_RIGHT,
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::FORIZONTAL_CENTER,
+                // 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::FORIZONTAL_CENTER,
             ],
             // 'borders' => [
             //     'outline' => [

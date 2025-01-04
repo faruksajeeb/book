@@ -40,6 +40,8 @@
                     />
                     <HasError :form="form" field="title" />
                   </div>
+                   <Select2 v-model="myValue" :options="myOptions" :settings="{ settingOption: value, settingOption: value }" @change="myChangeEvent($event)" @select="mySelectEvent($event)" />
+    <h4>Value: {{ myValue }}</h4>
                   <div class="input-group mb-2 row mx-0 px-0">
                    
                     <div class="input-group-prepend px-0 col-md-4 mx-0">
@@ -47,13 +49,13 @@
                         >Author
                         <div class="text-danger">*</div></label
                       >
-                    </div>
-                
+                    </div>               
                     <select
-                      class="custom-select mx-0 pe-0"
+                      class="custom-select mx-0 pe-0 select2"
                       id="inputGroupSelect01"
                       v-model="form.author_id"
                       :class="{ 'is-invalid': form.errors.has('author_id') }"
+                      multiple
                     >
                    
                       <option value="" disabled selected>Choose...</option>
@@ -339,6 +341,7 @@
                   :is-submitting="isSubmitting"
                 ></save-changes-button>
                 <reset-button @reset-data="resetData" />
+
               </div>
             </form>
           </div>
@@ -348,10 +351,19 @@
   </div>
 </template>
 <script type="text/javascript">
+import $ from 'jquery';
+import 'select2';
+
+import Select2 from 'vue3-select2-component';
 import { mapActions } from "vuex";
 export default {
+components: {
+    Select2
+  },
   data() {
     return {
+myValue: '',
+            myOptions: ['op1', 'op2', 'op3'],
       isSubmitting: false,
       imageUrl: null,
       book: false,

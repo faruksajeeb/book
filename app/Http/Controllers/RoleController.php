@@ -32,7 +32,7 @@ class RoleController extends Controller
     public function index()
     {
         #permission verfy
-        $this->webspice->permissionVerify('role.manage');
+       $this->webspice->permissionVerify('role.manage');
 
         // $fileTag = '';
         // if ($request->get('status') == 'archived') {
@@ -105,8 +105,8 @@ class RoleController extends Controller
         #permission verfy
         $this->webspice->permissionVerify('role.create');
 
-        $permission_groups = PermissionGroup::with('activePermissions')->where('status', 1)->orderBy('order')->get();
-
+        $permission_groups = PermissionGrou::with('activePermissions')->where('status', 1)->orderBy('order')->get();
+        
         return view('role.create', [
             'permission_groups' => $permission_groups,
         ]);
@@ -122,7 +122,7 @@ class RoleController extends Controller
         $request->validate(
             [
                 'name' => 'required|regex:/^[a-zA-Z ]+$/u|min:3|max:20|unique:roles',
-                'selectedPermissions' => 'required'
+                //'selectedPermissions' => 'required'
             ],
             [
                 'selectedPermissions.required' => 'Please assign at least one permission.',
@@ -214,7 +214,7 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         #permission verfy
-        // $this->webspice->permissionVerify('role.edit');
+        $this->webspice->permissionVerify('role.edit');
 
         # decrypt value
         // $id = $this->webspice->encryptDecrypt('decrypt', $id);

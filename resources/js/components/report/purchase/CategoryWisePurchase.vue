@@ -147,7 +147,7 @@
   <div ref="targetDiv" class="scroll-target">
     <hr />
 
-    <div class="row" v-if="sales.length > 0">
+    <div class="row" v-if="purchases.length > 0">
       <div id="printableContent" class="col-md-10 offset-md-1 border my-3 rounded-sm">
         <h3 class="my-2">Purchases</h3>
      
@@ -161,14 +161,14 @@
             <td class="fw-bold text-white text-right">Quantity</td>
             <td class="fw-bold text-white text-right">Amount</td>
           </tr>
-          <tr v-for="sale in sales">
-            <td class="text-center">{{ sale.sale_date }}</td>
-            <td class="text-left">{{ sale.book_name }}</td>
-            <td class="text-left">{{ sale.author_name }}</td>
-            <td class="text-left">{{ sale.publisher_name }}</td>
-            <td class="text-left">{{ sale.supplier_name }}</td>
-            <td class="text-center">{{ sale.quantity }}</td>
-            <td class="text-right">{{ sale.sub_total }}</td>
+          <tr v-for="purchase in purchases">
+            <td class="text-center">{{ purchase.purchase_date }}</td>
+            <td class="text-left">{{ purchase.book_name }}</td>
+            <td class="text-left">{{ purchase.author_name }}</td>
+            <td class="text-left">{{ purchase.publisher_name }}</td>
+            <td class="text-left">{{ purchase.supplier_name }}</td>
+            <td class="text-center">{{ purchase.quantity }}</td>
+            <td class="text-right">{{ purchase.sub_total }}</td>
           </tr>
           <tr>
             <td
@@ -204,7 +204,7 @@ export default {
       publishers: [],
       suppliers: [],
       categories: [],
-      sales: [],
+      purchases: [],
       form: new Form({
         author_id:'all',
         publisher_id:'all',
@@ -216,6 +216,7 @@ export default {
     };
   },
   async created() {
+    this.fetchCategories();
     this.suppliers = this.$store.getters.getSuppliers;
     if (this.suppliers.length == 0) {
       const response = await axios.get("/api/get-suppliers");
@@ -293,7 +294,7 @@ export default {
         document.querySelector(".export-btn-print").innerHTML = loader;
       }
       await this.form
-        .post("/api/report/category-wise-sale", {
+        .post("/api/report/category-wise-purchase", {
           params: {
             ...this.form,
           },
@@ -304,14 +305,14 @@ export default {
             this.isResponsed = true;
             this.date_range = response.data.date_range;
             this.supplier = response.data.supplier;
-            this.sales = response.data.sales;
+            this.purchases = response.data.purchases;
           } else {
             if (this.form.btn_type == "excel") {
               Notification.success("Exported Successfully");
               var fileURL = window.URL.createObjectURL(new Blob([response.data]));
               var fileLink = document.createElement("a");
               fileLink.href = fileURL;
-              fileLink.setAttribute("download", "sale-report.xlsx");
+              fileLink.setAttribute("download", "purchase-report.xlsx");
               document.body.appendChild(fileLink);
               fileLink.click();
             } else if (this.form.btn_type == "pdf") {
@@ -380,7 +381,7 @@ export default {
         });
     },
     calculateSubTotalAmount() {
-      return this.sales.reduce((total, sale) => total + Number(sale.sub_total), 0);
+      return this.purchases.reduce((total, purchase) => total + Number(purchase.sub_total), 0);
     },
     clearError(fieldName) {
       this.form.errors.clear(fieldName);

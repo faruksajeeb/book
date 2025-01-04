@@ -143,7 +143,7 @@
                         style="width: 70px"
                         type="text"
                         placeholder="By ID"
-                        class="form-control-sm"
+                        class="form-control-sm  p-0"
                         v-model="params.id"
                       />
                     </th>
@@ -152,7 +152,7 @@
                         type="text"
                         placeholder="Search By Date Range"
                         id="datecalander"
-                        class="form-control-sm"
+                        class="form-control-sm p-0"
                         style="width: 100%"
                         v-model="params.payment_date"
                       />
@@ -161,7 +161,7 @@
                       <select
                         v-model="params.supplier_id"
                         style="width: 100%"
-                        class="form-select-sm"
+                        class="form-select p-0"
                       >
                         <option value="" selected>--select supplier--</option>
                         <option
@@ -177,7 +177,7 @@
                       <input
                         type="text"
                         placeholder="Search By Total Amount"
-                        class="form-control-sm"
+                        class="form-control-sm p-0"
                         style="width: 100%"
                         v-model="params.payment_amount"
                       />
@@ -186,7 +186,7 @@
                       <select
                         v-model="params.payment_method"
                         style="width: 100%"
-                        class="form-select-sm"
+                        class="form-select p-0"
                       >
                         <option value="" selected>--select payment method--</option>
                         <option

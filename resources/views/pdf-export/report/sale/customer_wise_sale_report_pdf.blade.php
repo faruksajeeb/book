@@ -7,15 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Sale Invoice</title>
     <style>
-           @page  {
-        margin: 5em;
-        size: A4; /*or width then height 150mm 50mm*/
-        }
-        * {
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .text-center {
+           .text-center {
             text-align: center;
         }
 
@@ -36,10 +28,30 @@
         }
 
         .thead_label {
-            font-weight: bold;
+            /* font-weight: bold!important; */
             background-color: #434141;
             color: #FFFFFF;
             padding: 5px;
+        }
+
+        table,
+        td,
+        th {
+            padding: 3px;
+            border: 1px dotted #CCCCCC;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        span.report-name{
+            display: inline;
+            background-color:#57375D; 
+            color:#FFFFFF; 
+            border-radius:5px;   
+            font-size:15px;  
+            padding: 5px;   
         }
     </style>
 </head>

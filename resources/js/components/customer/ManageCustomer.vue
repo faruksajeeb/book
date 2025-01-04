@@ -79,7 +79,7 @@
                     <th class="text-right">Photo</th>
                     <th scope="col">
                       <a href="#" @click.prevent="changeShort('customer_name')"
-                        >Customer Name</a
+                        >Name</a
                       >
                       <!-- <a href="#">Name</a> -->
                       <span
@@ -98,14 +98,13 @@
                       >
                     </th>
                     <th class="text-right"  title="Posetive=Due, (-)Negetive=Advanced">Balance</th>
-                    <th class="text-right">Phone</th>
-                    <th class="text-right">Email</th>
+                    <th class="text-left">Phone</th>
+                    <th class="text-left">Email</th>
                     <th class="text-right">Address</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-center">Action</th>
                   </tr>
                   <tr>
-                    <th></th>
-                    <th>
+                    <th colspan="2" class="p-0 m-0 ">
                       <input
                         type="text"
                         placeholder="Search By ID"
@@ -113,25 +112,23 @@
                         v-model="params.id"
                       />
                     </th>
-                    <th></th>
-                    <th>
+                    <th colspan="2" class="p-0 m-0 ">
                       <input
                         type="text"
-                        placeholder="Search By Customer Name"
+                        placeholder="Search By Name"
                         class="form-control"
                         v-model="params.customer_name"
                       />
                     </th>
-                    <th></th>
-                    <th>
+                    <th colspan="2" class="p-0 m-0 ">
                       <input
                         type="text"
-                        placeholder="Search By Customer Phone"
+                        placeholder="Search By Mobile No"
                         class="form-control"
                         v-model="params.customer_phone"
                       />
                     </th>
-                    <th>
+                    <th class="p-0 m-0">
                       <input
                         type="text"
                         placeholder="Search By Customer Email"
@@ -139,7 +136,7 @@
                         v-model="params.customer_email"
                       />
                     </th>
-                    <th>
+                    <th colspan="2" class="p-0 m-0">
                       <input
                         type="text"
                         placeholder="Search By Customer Address"
@@ -147,7 +144,6 @@
                         v-model="params.customer_address"
                       />
                     </th>
-                    <th></th>
                   </tr>
                 </thead>
                 <tbody v-if="customers && paginator.totalRecords > 0">

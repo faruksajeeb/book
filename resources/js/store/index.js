@@ -2,13 +2,13 @@ import { createStore } from "vuex";
 import api from "../api"; // Import your API service
 
 // Load user permissions from localStorage or sessionStorage during store initialization
-const userPermissions = JSON.parse(localStorage.getItem('userPermissions')) || [];
+const userPermissions = JSON.parse(localStorage.getItem("userPermissions")) || [];
 
 // Create a new store instance.
 const store = createStore({
     state() {
         return {
-            pageTitle: 'Default Title', // Initial title
+            pageTitle: "Default Title", // Initial title
             message: "welcome",
             option_groups: [],
             categories: [],
@@ -28,20 +28,18 @@ const store = createStore({
     getters: {
         getPemissions: (state) => {
             api.fetchPermissions().then((permissions) => {
-                // console.log(state.permissions);
                 state.permissions = permissions;
             });
             return state.permissions;
-            // console.log(state.permissions);
-            // let formatedPermission = state.permissions.map((permission) => {
-            //     const str = `${permission.name}`;
-            //     const formatedName = str.charAt(0).toUpperCase() + str.slice(1);
-            //     return {
-            //         id: permission.id,
-            //         name: formatedName,
-            //     };
-            // });
-            // return formatedPermission;
+        },
+        hasPermission: (state) => (requiredPermissions) => {
+            const userPermissions = Object.values(state.user.permissions);
+            const required = Array.isArray(requiredPermissions)
+                ? requiredPermissions
+                : [requiredPermissions];
+            return required.every((permission) =>
+                userPermissions.includes(permission)
+            );
         },
         getRoles: (state) => {
             api.fetchRoles().then((roles) => {
@@ -78,18 +76,19 @@ const store = createStore({
                 state.payment_methods = payment_methods;
             });
             return state.payment_methods;
-        },
-        hasPermission: (state) => (permission) => {
-            return state.user.permissions.includes(`${permission}`);
-        },
+        }
+        
     },
     mutations: {
         setPageTitle(state, title) {
             state.pageTitle = title;
-          },
+        },
         setUserPermissions(state, permissions) {
             state.user.permissions = permissions;
-            localStorage.setItem('userPermissions', JSON.stringify(permissions));
+            localStorage.setItem(
+                "userPermissions",
+                JSON.stringify(permissions)
+            );
             // console.log('User Permissions:', permissions);
         },
         setRoles(state, roles) {
@@ -106,16 +105,29 @@ const store = createStore({
         },
     },
     actions: {
-        fetchUserPermissions({ commit }) {
-            // Replace this with the actual API call to fetch user permissions
-            // e.g., using axios or fetch
-            const userId = User.id();
-            if (userId) {
-                api.fetchUserPermissions().then((permissions) => {
-                    if (permissions) {
-                        commit("setUserPermissions", permissions);
-                    }
-                });
+        async fetchUserPermissions({ commit }) {
+            try {
+                // Fetch the current user's ID
+                const userId = User.id();
+
+                if (!userId) {
+                    console.warn(
+                        "User ID is not available. Cannot fetch permissions."
+                    );
+                    return;
+                }
+
+                // Make the API call to fetch user permissions
+                const permissions = await api.fetchUserPermissions(userId);
+
+                if (permissions) {
+                    // Commit the fetched permissions to the Vuex store
+                    commit("setUserPermissions", permissions);
+                } else {
+                    console.warn("No permissions returned from API.");
+                }
+            } catch (error) {
+                console.error("Error fetching user permissions:", error);
             }
         },
         fetchRoles({ commit }) {

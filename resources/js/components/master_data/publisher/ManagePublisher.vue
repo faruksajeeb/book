@@ -60,7 +60,7 @@
                     <th scope="col" class="text-center">
                       <input type="checkbox" class="form-check p-3" />
                     </th>
-                    <th scope="col">
+                    <!-- <th scope="col">
                       <a href="#" @click.prevent="changeShort('id')">#ID</a>
                       <span
                         v-if="
@@ -76,7 +76,7 @@
                         "
                         >↓</span
                       >
-                    </th>
+                    </th> -->
                     <th class="text-center">Photo</th>
                     <th scope="col">
                       <a href="#" @click.prevent="changeShort('publisher_name')"
@@ -104,47 +104,47 @@
                     <th class="text-center">Action</th>
                   </tr>
                   <tr>
-                    <th colspan="2">
+                    <th></th>
+                    <!-- <th class="p-0" colspan="2">
                       <input
                         type="text"
                         placeholder="Search By ID"
-                        class="form-control"
+                        class="form-control-sm w-100"
                         v-model="params.id"
                       />
-                    </th>
-                    <th colspan="2">
+                    </th> -->
+                    <th class="p-0" colspan="2">
                       <input
                         type="text"
                         placeholder="Search By publisher Name"
-                        class="form-control"
+                        class="form-control-sm w-100"
                         v-model="params.publisher_name"
                       />
                     </th>
-                    <th>
+                    <th class="p-0">
                       <input
                         type="text"
                         placeholder="Search By publisher Phone"
-                        class="form-control"
+                        class="form-control-sm w-100"
                         v-model="params.publisher_phone"
                       />
                     </th>
-                    <th>
+                    <th class="p-0">
                       <input
                         type="text"
                         placeholder="Search By publisher Email"
-                        class="form-control"
+                        class="form-control-sm w-100"
                         v-model="params.publisher_email"
                       />
                     </th>
-                    <th>
+                    <th class="p-0" colspan="2">
                       <input
                         type="text"
                         placeholder="Search By publisher Address"
-                        class="form-control"
+                        class="form-control-sm w-100"
                         v-model="params.publisher_address"
                       />
                     </th>
-                    <th></th>
                   </tr>
                 </thead>
                 <tbody v-if="publishers && paginator.totalRecords > 0">
@@ -157,7 +157,7 @@
                         class="form-check-input"
                       />
                     </td>
-                    <td class="text-nowrap">{{ publisher.id }}</td>
+                    <!-- <td class="text-nowrap">{{ publisher.id }}</td> -->
                     <td>
                       <img
                         :src="
@@ -200,7 +200,7 @@
                 </tbody>
                 <tbody v-else>
                   <tr>
-                    <td colspan="8" class="text-center loading-section">
+                    <td colspan="7" class="text-center loading-section">
                       <loader v-if="isLoading"></loader>
                       <NoRecordFound v-else />
                     </td>

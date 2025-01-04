@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class DamageItem extends Model
+class DamagedItem extends Model
 {
     use HasFactory,SoftDeletes;
     public $fillable = [

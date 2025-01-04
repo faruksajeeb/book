@@ -35,7 +35,7 @@ class PermissionController extends Controller
     {
      
         #permission verfy
-        $res = $this->webspice->permissionVerify('permission.manage');
+       $res = $this->webspice->permissionVerify('permission.manage');
 
         // $fileTag = '';
         // if ($request->get('status') == 'archived') {
@@ -66,7 +66,7 @@ class PermissionController extends Controller
         // $permissions = $query->paginate(8);
         // return view('permission.index', compact('permissions'));
         try {
-            $paginate = request('paginate', 6);
+            $paginate = request('paginate', 10);
             $searchTerm = request('search', '');
 
             $sortField = request('sort_field', 'created_at');
@@ -107,7 +107,7 @@ class PermissionController extends Controller
     public function create()
     {
         #permission verfy
-        // $this->webspice->permissionVerify('permission.create');
+        $this->webspice->permissionVerify('permission.create');
 
         // $permissions = Permission::all();
         // $permission_groups = DB::table('permission_groups')->where('status', 1)->get();
@@ -151,6 +151,7 @@ class PermissionController extends Controller
             //     'is_menu' => $request->is_menu,
             //     'menu_name' => $request->menu_name,
             //     'icon' => $request->icon,
+            'status' => 1,
         );
         try {
             $this->permissions->create($data);

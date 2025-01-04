@@ -100,7 +100,7 @@ class UserController extends Controller
     public function create()
     {
         #permission verfy
-        $this->webspice->permissionVerify('user.create');
+        //$this->webspice->permissionVerify('user.create');
         $roles = Role::where('status', 1)->get();
         $permission_groups = PermissionGroup::with('activePermissions')->where('status', 1)->orderBy('order')->get();
 
@@ -109,13 +109,11 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-
         #permission verfy
         $this->webspice->permissionVerify('user.create');
-
         $request->validate(
             [
-                'name' => 'required|regex:/^[a-zA-Z0-9_ ]+$/u|min:3|max:20',
+                'name' => 'required|min:3|max:20',
                 'email' => 'required|min:3|email|max:20|unique:users',
                 'password' => 'required|min:6|confirmed',
                 'selectedRoles' => 'required',
@@ -170,8 +168,6 @@ class UserController extends Controller
         }
     }
 
-
-    
     public function show($id)
     {
          #permission verfy
@@ -211,14 +207,14 @@ class UserController extends Controller
     {
       
         #permission verfy
-        $this->webspice->permissionVerify('user.update');
+        $this->webspice->permissionVerify('user.edit');
         # decrypt value
         // $id = $this->webspice->encryptDecrypt('decrypt', $id);
 
       
         $request->validate(
             [
-                'name'     => 'required|regex:/^[a-zA-Z0-9_ ]+$/u|min:3|max:50',
+                'name'     => 'required|min:3|max:50',
                 'email'    => 'required|min:3|email|max:20|unique:users,email,' . $id,
                 'password' => 'nullable|min:6|confirmed',
                 'selectedRoles' => 'required',

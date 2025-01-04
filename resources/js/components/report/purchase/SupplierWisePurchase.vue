@@ -4,7 +4,7 @@
         <div class="card mt-3">
           <div class="card-header">
             <h3 class="text-center fw-bold">
-              <i class="fa fa-chart-pie"></i> Supplier Wise Sale Report
+              <i class="fa fa-chart-pie"></i> Supplier Wise Purchase Report
             </h3>
           </div>
           <form id="form" @submit.prevent="submitForm">
@@ -87,9 +87,9 @@
     <div ref="targetDiv" class="scroll-target">
     <hr/>
   
-      <div class="row " v-if="sales.length > 0">
+      <div class="row " v-if="purchases.length > 0">
         <div id="printableContent" class="col-md-10 offset-md-1 border my-3 rounded-sm">
-          <h3 class="my-2">Sales</h3>
+          <h3 class="my-2">Purchase Report</h3>
           <table class="table table-sm">
           
             <tr v-if="supplier">
@@ -112,7 +112,7 @@
           <table class="table table-sm">
             
             <tr class="bg-secondary">
-              <td class="fw-bold text-white">Sale Date</td>
+              <td class="fw-bold text-white">Purchase Date</td>
               <td class="fw-bold text-white" v-if="supplier.supplier_name == 'All'">
                 Supplier Name
               </td>
@@ -123,26 +123,26 @@
               <td class="fw-bold text-white text-right ">Pay Amount</td>
               <td class="fw-bold text-white text-right ">Due Amount</td>
             </tr>
-            <tr v-for="sale in sales">
-              <td>{{ sale.sale_date }}</td>
+            <tr v-for="purchase in purchases">
+              <td>{{ purchase.purchase_date }}</td>
               <td v-if="supplier.supplier_name == 'All'">
-                {{ sale.supplier.supplier_name }}
+                {{ purchase.supplier.supplier_name }}
               </td>
-              <td class="text-right">{{ sale.total_amount }}</td>
-              <td class="text-center">{{ sale.discount_percentage }}</td>
-              <td class="text-right">{{ sale.discount_amount }}</td>
-              <td class="text-right">{{ sale.net_amount }}</td>
-              <td class="text-right">{{ sale.pay_amount }}</td>
-              <td class="text-right">{{ sale.due_amount }}</td>
+              <td class="text-right">{{ purchase.total_amount }}</td>
+              <td class="text-center">{{ purchase.discount_percentage }}</td>
+              <td class="text-right">{{ purchase.discount_amount }}</td>
+              <td class="text-right">{{ purchase.net_amount }}</td>
+              <td class="text-right">{{ purchase.pay_amount }}</td>
+              <td class="text-right">{{ purchase.due_amount }}</td>
             </tr>
             <tr>
               <td
                 class="fw-bold text-left"
                 :colspan="supplier.supplier_name == 'All' ? 2 : 1"
               >
-                Sale Total
+                Purchase Total
               </td>
-              <td class="fw-bold text-right">{{ calculateTotalSaleAmount() }}</td>
+              <td class="fw-bold text-right">{{ calculateTotalPurchaseAmount() }}</td>
               <td></td>
               <td class="fw-bold text-right">{{ calculateTotalDiscountAmount() }}</td>
               <td class="fw-bold text-right">{{ calculateTotalNetAmount() }}</td>
@@ -172,7 +172,7 @@
         supplier: {},
         date_range: "",
         suppliers: [],
-        sales: [],
+        purchases: [],
   
         form: new Form({
           supplier_id: "",
@@ -243,7 +243,7 @@
           document.querySelector(".export-btn-print").innerHTML = loader;
         }
         await this.form
-          .post("/api/report/supplier-wise-sale", {
+          .post("/api/report/supplier-wise-purchase", {
             params: {
               ...this.form,
             },
@@ -254,14 +254,14 @@
               this.isResponsed = true;
               this.date_range = response.data.date_range;
               this.supplier = response.data.supplier;
-              this.sales = response.data.sales;
+              this.purchases = response.data.purchases;
             } else {
               if (this.form.btn_type == "excel") {
                 Notification.success("Exported Successfully");
                 var fileURL = window.URL.createObjectURL(new Blob([response.data]));
                 var fileLink = document.createElement("a");
                 fileLink.href = fileURL;
-                fileLink.setAttribute("download", "supplier-wise-sale-report.xlsx");
+                fileLink.setAttribute("download", "supplier-wise-Purchase-report.xlsx");
                 document.body.appendChild(fileLink);
                 fileLink.click();
               } else if (this.form.btn_type == "pdf") {
@@ -271,7 +271,7 @@
                 );
                 var fileLink = document.createElement("a");
                 fileLink.href = fileURL;
-                fileLink.setAttribute("download", "supplier-wise-sale-report.pdf");
+                fileLink.setAttribute("download", "supplier-wise-Purchase-report.pdf");
                 document.body.appendChild(fileLink);
                 fileLink.click();
               } else if (this.form.btn_type == "print") {
@@ -329,33 +329,33 @@
             }
           });
       },
-      calculateTotalSaleAmount() {
-        return this.sales.reduce(
-          (total, sale) => total + Number(sale.total_amount),
+      calculateTotalPurchaseAmount() {
+        return this.purchases.reduce(
+          (total, purchase) => total + Number(purchase.total_amount),
           0
         );
       },
       calculateTotalDiscountAmount() {
-        return this.sales.reduce(
-          (total, sale) => total + Number(sale.discount_amount),
+        return this.purchases.reduce(
+          (total, purchase) => total + Number(purchase.discount_amount),
           0
         );
       },
       calculateTotalNetAmount() {
-        return this.sales.reduce(
-          (total, sale) => total + Number(sale.net_amount),
+        return this.purchases.reduce(
+          (total, purchase) => total + Number(purchase.net_amount),
           0
         );
       },
       calculateTotalPayAmount() {
-        return this.sales.reduce(
-          (total, sale) => total + Number(sale.pay_amount),
+        return this.purchases.reduce(
+          (total, purchase) => total + Number(purchase.pay_amount),
           0
         );
       },
       calculateTotalDueAmount() {
-        return this.sales.reduce(
-          (total, sale) => total + Number(sale.due_amount),
+        return this.purchases.reduce(
+          (total, purchase) => total + Number(purchase.due_amount),
           0
         );
       },

@@ -16,8 +16,8 @@
                 <div class="col-md-2">
                   <label for="" class="me-3">Per Page: </label>
                   <select v-model="params.paginate" id="" class="py-2">
-                    <option value="5" selected>5</option>
-                    <option value="10">10</option>
+                    <option value="5" >5</option>
+                    <option value="10" selected>10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -60,7 +60,7 @@
                     <th scope="col" class="text-center">
                       <input type="checkbox" class="form-check p-3" />
                     </th>
-                    <th scope="col">
+                    <!-- <th scope="col">
                       <a href="#" @click.prevent="changeShort('id')">#ID</a>
                       <span
                         v-if="
@@ -76,7 +76,7 @@
                         "
                         >↓</span
                       >
-                    </th>
+                    </th> -->
                     <th scope="col">
                       <a href="#" @click.prevent="changeShort('name')">Name</a>
                       <!-- <a href="#">Name</a> -->
@@ -100,14 +100,14 @@
                   </tr>
                   <tr>
                     <th></th>
-                    <th>
+                    <!-- <th>
                       <input
                         type="text"
                         placeholder="Search By ID"
                         class="form-control"
                         v-model="params.id"
                       />
-                    </th>
+                    </th> -->
                     <th>
                       <input
                         type="text"
@@ -130,7 +130,7 @@
                         class="form-check-input"
                       />
                     </td>
-                    <td style="width: 20px" class="text-nowrap">{{ role.id }}</td>
+                    <!-- <td style="width: 20px" class="text-nowrap">{{ role.id }}</td> -->
                     <td>{{ role.name }}</td>
                     <td>
                      
@@ -222,7 +222,7 @@
                 </tbody>
                 <tbody v-else>
                   <tr>
-                    <td colspan="5" class="text-center loading-section">
+                    <td colspan="4" class="text-center loading-section">
                       <loader v-if="isLoading"></loader>
                       <NoRecordFound v-else />
                     </td>
@@ -276,7 +276,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 10,
         id: "",
         name: "",
         sort_field: "created_at",

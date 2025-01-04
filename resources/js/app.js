@@ -32,6 +32,7 @@ router.beforeEach((to, from, next) => {
 import Notification from "./Helpers/Notification";
 window.Notification = Notification;
 
+
 import Swal from "sweetalert2";
 window.Swal = Swal;
 const Toast = Swal.mixin({

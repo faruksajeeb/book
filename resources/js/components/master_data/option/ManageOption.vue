@@ -78,7 +78,7 @@
                     <th scope="col" class="text-center">
                       <input type="checkbox" class="form-check p-3" />
                     </th>
-                    <th scope="col">
+                    <!-- <th scope="col">
                       <a href="#" @click.prevent="changeShort('id')">#ID</a>
                       <span
                         v-if="
@@ -94,7 +94,7 @@
                         "
                         >↓</span
                       >
-                    </th>
+                    </th> -->
                     <th scope="col">
                       <a href="#" @click.prevent="changeShort('name')">Option Name</a>
                       <!-- <a href="#">Name</a> -->
@@ -113,19 +113,19 @@
                         >↓</span
                       >
                     </th>
-                    <th class="text-right">Option Group</th>
-                    <th class="text-right">Action</th>
+                    <th class="text-left">Option Group</th>
+                    <th class="text-center">Action</th>
                   </tr>
                   <tr>
                     <th></th>
-                    <th>
+                    <!-- <th>
                       <input
                         type="text"
                         placeholder="Search By ID"
                         class="form-control"
                         v-model="params.id"
                       />
-                    </th>
+                    </th> -->
                     <th>
                       <input
                         type="text"
@@ -153,7 +153,7 @@
                         class="form-check-input"
                       />
                     </td>
-                    <td class="text-nowrap">{{ option.id }}</td>
+                    <!-- <td class="text-nowrap">{{ option.id }}</td> -->
                     <td>{{ option.name }}</td>
                     <td>
                        {{ option.option_group.name }}
@@ -182,7 +182,7 @@
                 </tbody>
                 <tbody v-else>
                   <tr>
-                    <td colspan="5" class="text-center loading-section">
+                    <td colspan="4" class="text-center loading-section">
                       <loader v-if="isLoading"></loader>
                       <NoRecordFound v-else />
                     </td>

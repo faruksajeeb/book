@@ -103,47 +103,46 @@
                     <th class="text-center">Action</th>
                   </tr>
                   <tr>
-                    <th colspan="2">
+                    <th class="p-0" colspan="2">
                       <input
                         type="text"
                         placeholder="Search By ID"
-                        class="form-control"
+                        class="form-control-sm w-100"
                         v-model="params.id"
                       />
                     </th>
-                    <th colspan="2">
+                    <th class="p-0" colspan="2">
                       <input
                         type="text"
-                        placeholder="Search By Supplier Name"
-                        class="form-control"
+                        placeholder="Search By  Name"
+                        class="form-control-sm w-100"
                         v-model="params.supplier_name"
                       />
                     </th>
-                    <th>
+                    <th class="p-0">
                       <input
                         type="text"
-                        placeholder="Search By Supplier Phone"
-                        class="form-control"
+                        placeholder="Search By  Phone"
+                        class="form-control-sm w-100"
                         v-model="params.supplier_phone"
                       />
                     </th>
-                    <th>
+                    <th class="p-0">
                       <input
                         type="text"
-                        placeholder="Search By Supplier Email"
-                        class="form-control"
+                        placeholder="Search By  Email"
+                        class="form-control-sm w-100"
                         v-model="params.supplier_email"
                       />
                     </th>
-                    <th>
+                    <th class="p-0" colspan="2">
                       <input
                         type="text"
-                        placeholder="Search By Supplier Address"
-                        class="form-control"
+                        placeholder="Search By  Address"
+                        class="form-control-sm w-100"
                         v-model="params.supplier_address"
                       />
                     </th>
-                    <th></th>
                   </tr>
                 </thead>
                 <tbody v-if="suppliers && paginator.totalRecords > 0">

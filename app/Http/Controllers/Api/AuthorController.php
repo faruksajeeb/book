@@ -32,7 +32,7 @@ class AuthorController extends Controller
         $this->webspice->permissionVerify('author.manage');
 
         try {
-            $paginate = request('paginate', 5);
+            $paginate = request('paginate', 10);
             $searchTerm = request('search', '');
 
             $sortField = request('sort_field', 'created_at');
@@ -84,7 +84,7 @@ class AuthorController extends Controller
 
         $request->validate(
             [
-                'author_name' => 'required|regex:/^[a-zA-Z 0-9]+$/u|min:3|max:20|unique:authors',
+                'author_name' => 'required|regex:/^[a-zA-Z 0-9]+$/u|min:3|max:50|unique:authors',
               
                 'author_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],
@@ -160,7 +160,7 @@ class AuthorController extends Controller
 
         $request->validate(
             [
-                'author_name' => 'required|regex:/^[a-zA-Z 0-9]+$/u|min:3|max:20|unique:authors,author_name,' . $id,               
+                'author_name' => 'required|regex:/^[a-zA-Z 0-9]+$/u|min:3|max:50|unique:authors,author_name,' . $id,               
                 'author_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],
             [

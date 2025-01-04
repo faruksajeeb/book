@@ -5,7 +5,7 @@ const token = localStorage.getItem("token");
 if (!token) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    if (window.location.href != "http://localhost:8000/") {
+    if (window.location.href != "https://book.test/") {
         window.location.replace("/"); // go to '/login';
         // this.$router.push({ name: 'login'})
     }

@@ -40,8 +40,8 @@
                     </a>
                     <div id="collapseUserRole" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionUserMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('role.create')"  class="collapse-item p-1" to="/roles/create">Add Role</router-link>
-                        <router-link v-if="userPermissions.includes('role.manage')"  class="collapse-item p-1" to="/roles">Manage Role</router-link>
+                        <router-link v-if="hasPermission('role.create')"  class="collapse-item p-1" to="/roles/create">Add Role</router-link>
+                        <router-link v-if="hasPermission('role.manage')"  class="collapse-item p-1" to="/roles">Manage Role</router-link>
                       </div>
                   </div>
             </li>
@@ -52,9 +52,9 @@
                     </a>
                     <div id="collapseUserLevel" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionUserMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('user.create')" class="collapse-item p-1" to="/users/create">Add User</router-link>
+                        <router-link v-if="hasPermission('user.create')" class="collapse-item p-1" to="/users/create">Add User</router-link>
                       
-                        <router-link v-if="userPermissions.includes('user.manage')"   class="collapse-item p-1" to="/users">Manage User</router-link>
+                        <router-link v-if="hasPermission('user.manage')"   class="collapse-item p-1" to="/users">Manage User</router-link>
                       
                       </div>
                   </div>
@@ -66,8 +66,8 @@
                     </a>
                     <div id="collapseUserPermission" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionUserMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('permission.create')"  class="collapse-item p-1" to="/add-permission">Add Permission</router-link>
-                        <router-link v-if="userPermissions.includes('permission.manage')"  class="collapse-item p-1" to="/manage-permission">Manage Permission</router-link>
+                        <router-link v-if="hasPermission('permission.create')"  class="collapse-item p-1" to="/add-permission">Add Permission</router-link>
+                        <router-link v-if="hasPermission('permission.manage')"  class="collapse-item p-1" to="/manage-permission">Manage Permission</router-link>
                       </div>
                   </div>
             </li>
@@ -91,8 +91,8 @@
                     </a>
                     <div id="collapseOptionGroup" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionMasterDataMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('option_group.create')"  class="collapse-item p-1" to="/option-groups/create">Add Option Group</router-link>
-                        <router-link v-if="userPermissions.includes('option_group.manage')"  class="collapse-item p-1" to="/option-groups">Manage Option Group</router-link>
+                        <router-link v-if="hasPermission('option_group.create')"  class="collapse-item p-1" to="/option-groups/create">Add Option Group</router-link>
+                        <router-link v-if="hasPermission('option_group.manage')"  class="collapse-item p-1" to="/option-groups">Manage Option Group</router-link>
                       </div>
                   </div>
             </li>
@@ -103,8 +103,8 @@
                     </a>
                     <div id="collapseOption" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionMasterDataMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('option.create')"  class="collapse-item p-1" to="/options/create">Add Option</router-link>
-                        <router-link v-if="userPermissions.includes('option.manage')"  class="collapse-item p-1" to="/options">Manage Option</router-link>
+                        <router-link v-if="hasPermission('option.create')"  class="collapse-item p-1" to="/options/create">Add Option</router-link>
+                        <router-link v-if="hasPermission('option.manage')"  class="collapse-item p-1" to="/options">Manage Option</router-link>
                       </div>
                   </div>
             </li>
@@ -115,8 +115,8 @@
                     </a>
                     <div id="collapseCategory" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionMasterDataMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('user.create')" class="collapse-item p-1" to="/categories/create">Add Category</router-link>                      
-                        <router-link v-if="userPermissions.includes('user.manage')"   class="collapse-item p-1" to="/categories">Manage Category</router-link>                      
+                        <router-link v-if="hasPermission('user.create')" class="collapse-item p-1" to="/categories/create">Add Category</router-link>                      
+                        <router-link v-if="hasPermission('user.manage')"   class="collapse-item p-1" to="/categories">Manage Category</router-link>                      
                       </div>
                   </div>
             </li>
@@ -127,8 +127,8 @@
                     </a>
                     <div id="collapseSubCategory" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionMasterDataMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('sub_category.create')"  class="collapse-item p-1" to="/sub-categories/create">Add Sub-category</router-link>
-                        <router-link v-if="userPermissions.includes('sub_category.manage')"  class="collapse-item p-1" to="/sub-categories">Manage Sub-category</router-link>
+                        <router-link v-if="hasPermission('sub_category.create')"  class="collapse-item p-1" to="/sub-categories/create">Add Sub-category</router-link>
+                        <router-link v-if="hasPermission('sub_category.manage')"  class="collapse-item p-1" to="/sub-categories">Manage Sub-category</router-link>
                       </div>
                   </div>
             </li>
@@ -139,8 +139,8 @@
                     </a>
                     <div id="collapseAuthor" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionMasterDataMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('author.create')"  class="collapse-item p-1" to="/authors/create">Add Author</router-link>
-                        <router-link v-if="userPermissions.includes('author.manage')"  class="collapse-item p-1" to="/authors">Manage Author</router-link>
+                        <router-link v-if="hasPermission('author.create')"  class="collapse-item p-1" to="/authors/create">Add Author</router-link>
+                        <router-link v-if="hasPermission('author.manage')"  class="collapse-item p-1" to="/authors">Manage Author</router-link>
                       </div>
                   </div>
             </li>
@@ -151,8 +151,8 @@
                     </a>
                     <div id="collapsePublisher" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionMasterDataMgtBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('publisher.create')"  class="collapse-item p-1" to="/publishers/create">Add Publisher</router-link>
-                        <router-link v-if="userPermissions.includes('publisher.manage')"  class="collapse-item p-1" to="/publishers">Manage Publisher</router-link>
+                        <router-link v-if="hasPermission('publisher.create')"  class="collapse-item p-1" to="/publishers/create">Add Publisher</router-link>
+                        <router-link v-if="hasPermission('publisher.manage')"  class="collapse-item p-1" to="/publishers">Manage Publisher</router-link>
                       </div>
                   </div>
             </li>
@@ -169,8 +169,8 @@
         </a>
         <div id="collapseCustomer" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <router-link v-if="userPermissions.includes('customer.create')"  class="collapse-item" to="/customers/create">Add Customer</router-link>
-            <router-link v-if="userPermissions.includes('customer.manage')"  class="collapse-item" to="/customers">Manage Customer</router-link>
+            <router-link v-if="hasPermission('customer.create')"  class="collapse-item" to="/customers/create">Add Customer</router-link>
+            <router-link v-if="hasPermission('customer.manage')"  class="collapse-item" to="/customers">Manage Customer</router-link>
           </div>
         </div>
       </li>
@@ -183,8 +183,8 @@
         </a>
         <div id="collapseSupplier" class="collapse" aria-labelledby="headingTable" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <router-link v-if="userPermissions.includes('supplier.create')"  class="collapse-item" to="/suppliers/create">Add Supplier</router-link>
-            <router-link v-if="userPermissions.includes('supplier.manage')"  class="collapse-item" to="/suppliers">Manage Supplier</router-link>
+            <router-link v-if="hasPermission('supplier.create')"  class="collapse-item" to="/suppliers/create">Add Supplier</router-link>
+            <router-link v-if="hasPermission('supplier.manage')"  class="collapse-item" to="/suppliers">Manage Supplier</router-link>
           </div>
         </div>
       </li>
@@ -197,8 +197,8 @@
         </a>
         <div id="collapseProduct" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <router-link v-if="userPermissions.includes('book.create')"  class="collapse-item" to="/books/create">Add Book</router-link>
-            <router-link v-if="userPermissions.includes('book.manage')"  class="collapse-item" to="/books">Manage Book</router-link>
+            <router-link v-if="hasPermission('book.create')"  class="collapse-item" to="/books/create">Add Book</router-link>
+            <router-link v-if="hasPermission('book.manage')"  class="collapse-item" to="/books">Manage Book</router-link>
           </div>
         </div>
       </li>
@@ -210,8 +210,8 @@
         </a>
         <div id="collapsePurchase" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <router-link v-if="userPermissions.includes('purchase.create')"  class="collapse-item" to="/purchases/create">Add Purchase</router-link>
-            <router-link v-if="userPermissions.includes('purchase.manage')"  class="collapse-item" to="/purchases">Manage Purchase</router-link>
+            <router-link v-if="hasPermission('purchase.create')"  class="collapse-item" to="/purchases/create">Add Purchase</router-link>
+            <router-link v-if="hasPermission('purchase.manage')"  class="collapse-item" to="/purchases">Manage Purchase</router-link>
           </div>
         </div>
       </li>
@@ -224,8 +224,8 @@
         </a>
         <div id="collapseSale" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
-            <router-link v-if="userPermissions.includes('sale.create')"  class="collapse-item" to="/sales/create">Add Sale</router-link>
-            <router-link v-if="userPermissions.includes('sale.manage')"  class="collapse-item" to="/sales">Manage Sale</router-link>
+            <router-link v-if="hasPermission('sale.create')"  class="collapse-item" to="/sales/create">Add Sale</router-link>
+            <router-link v-if="hasPermission('sale.manage')"  class="collapse-item" to="/sales">Manage Sale</router-link>
           </div>
         </div>
       </li>     
@@ -252,8 +252,8 @@
                     </a>
                     <div id="collapseCustomerPayment" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionPaymentBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('customer_payment.create')"  class="collapse-item p-1" to="/customer_payments/create">Add Payment</router-link>
-                        <router-link v-if="userPermissions.includes('customer_payment.manage')"  class="collapse-item p-1" to="/customer_payments">Manage Payment</router-link>
+                        <router-link v-if="hasPermission('customer_payment.create')"  class="collapse-item p-1" to="/customer_payments/create">Add Payment</router-link>
+                        <router-link v-if="hasPermission('customer_payment.manage')"  class="collapse-item p-1" to="/customer_payments">Manage Payment</router-link>
                       </div>
                   </div>
             </li>
@@ -264,8 +264,8 @@
                     </a>
                     <div id="collapseSupplierPayment" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionPaymentBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('supplier_payment.create')" class="collapse-item p-1" to="/supplier_payments/create">Add Payment</router-link>                      
-                        <router-link v-if="userPermissions.includes('supplier_payment.manage')"   class="collapse-item p-1" to="/supplier_payments">Manage Payment</router-link>                      
+                        <router-link v-if="hasPermission('supplier_payment.create')" class="collapse-item p-1" to="/supplier_payments/create">Add Payment</router-link>                      
+                        <router-link v-if="hasPermission('supplier_payment.manage')"   class="collapse-item p-1" to="/supplier_payments">Manage Payment</router-link>                      
                       </div>
                   </div>
             </li>
@@ -282,27 +282,27 @@
           <div id="collapseReturn" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
             <ul id="accordionReturnBar" class="navbar-nav accordion px-3" >
-            <li class="nav-item py-2 "  v-if="userPermissions.includes('sale_return.create') || userPermissions.includes('sale_return.manage')">
+            <li class="nav-item py-2 "  v-if="hasPermission('sale_return.create') || hasPermission('sale_return.manage')">
                     <a class="nav-link-layer-two collapsed" href="#" data-toggle="collapse" data-target="#collapseSaleReturn"
                       aria-expanded="true" aria-controls="collapseSaleReturn">                
                       <span>Sale Returns</span>
                     </a>
                     <div id="collapseSaleReturn" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionReturnBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link class="collapse-item p-1" v-if="userPermissions.includes('sale_return.create')" to="/sale-returns/create">Add Return</router-link>
-                        <router-link class="collapse-item p-1" v-if="userPermissions.includes('sale_return.manage')" to="/sale-returns">Manage Return</router-link>
+                        <router-link class="collapse-item p-1" v-if="hasPermission('sale_return.create')" to="/sale-returns/create">Add Return</router-link>
+                        <router-link class="collapse-item p-1" v-if="hasPermission('sale_return.manage')" to="/sale-returns">Manage Return</router-link>
                       </div>
                   </div>
             </li>
-            <li class="nav-item py-2"  v-if="userPermissions.includes('purchase_return.create') || userPermissions.includes('purchase_return.manage')" >
+            <li class="nav-item py-2"  v-if="hasPermission('purchase_return.create') || hasPermission('purchase_return.manage')" >
                     <a class="nav-link-layer-two collapsed" href="#" data-toggle="collapse" data-target="#collapsePurchaseReturn"
                       aria-expanded="true" aria-controls="collapsePurchaseReturn">                   
                       <span>Purchase Returns</span>
                     </a>
                     <div id="collapsePurchaseReturn" class="collapse ms-0" aria-labelledby="headingBootstrap" data-parent="#accordionReturnBar">
                       <div class="bg-white py-2  rounded">
-                        <router-link v-if="userPermissions.includes('purchase_return.create')" class="collapse-item p-1" to="/purchase-returns/create">Add Return</router-link>                      
-                        <router-link v-if="userPermissions.includes('purchase_return.manage')"   class="collapse-item p-1" to="/purchase-returns">Manage Return</router-link>
+                        <router-link v-if="hasPermission('purchase_return.create')" class="collapse-item p-1" to="/purchase-returns/create">Add Return</router-link>                      
+                        <router-link v-if="hasPermission('purchase_return.manage')"   class="collapse-item p-1" to="/purchase-returns">Manage Return</router-link>
                       
                       </div>
                   </div>
@@ -312,13 +312,13 @@
           </div>
       </li>
 
- <li class="nav-item" v-if="userPermissions.includes('damage_item.manage')" >
+ <li class="nav-item" v-if="hasPermission('damage_item.manage')" >
         <router-link  class="nav-link" to="/damage-items">
           <i class="fab fa-fw fa-wpforms"></i>
           <span>Damage Items</span>
         </router-link>
       </li>
-      <li class="nav-item" v-if="userPermissions.includes('report.view')" >
+      <li class="nav-item" v-if="hasPermission('report.view')" >
         <router-link  class="nav-link" to="/reports">
           <i class="fas fa-file-image"></i>
           <span>Reports</span>
@@ -435,6 +435,7 @@
 import { mapActions } from 'vuex';
 export default {
     name: 'Sidebar',
+
 	data(){
 	 return {	
     user_roles : User.userRoles().split(","), 
@@ -447,16 +448,22 @@ export default {
     mounted() {
       this.fetchUserPermissions(); // Fetch user permissions when the component is mounted
     },
+    computed: {
+      userPermissions() { 
+        // Fetch user permissions from Vuex store or component data
+        const permissions = this.$store.state.user.permissions;
+        return Array.isArray(permissions) ? permissions : Object.values(permissions);
+      }
+    },
     methods: {
       ...mapActions(['fetchUserPermissions']),
-    },
-    computed: {
-      userPermissions() {
-        // Fetch user permissions from Vuex store or component data
-        return this.$store.state.user.permissions; 
-      }
+       // Helper method to check permissions
+      hasPermission(permission) {
+        return this.userPermissions.includes(permission);
+      },
     }
 }
+
 </script>
 <style lang="" scoped>
 
