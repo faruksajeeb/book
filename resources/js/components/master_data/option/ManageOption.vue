@@ -204,7 +204,7 @@
                 <pagination
                   align="right"
                   :data="options"
-                  :limit="5"
+                  :limit="10"
                   @pagination-change-page="getOptions"
                 ></pagination>
               </div>
@@ -235,7 +235,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 10,
         id: "",
         name: "",
         group_name: "",

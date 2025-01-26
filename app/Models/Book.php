@@ -15,7 +15,7 @@ class Book extends Model
     protected $fillable = [
         'title',
         'isbn',
-        'author_id',
+        // 'author_id',
         'category_id',
         'sub_category_id',
         'genre',
@@ -55,19 +55,26 @@ class Book extends Model
             $q->orWhereHas('publisher',function($q) use($term){
                 $q->where('publisher_name','LIKE',$term);
             });
-            $q->orWhereHas('author',function($q) use($term){
-                $q->where('author_name','LIKE',$term);
+            $q->orWhereHas('authors', function ($authorQuery) use ($term) { // Note 'authors' relation name
+                $authorQuery->where('author_name', 'LIKE', $term);
             });
         });
     }
+
+    public function authors()
+    {
+        return $this->belongsToMany(Author::class, 'book_author', 'book_id', 'author_id');
+    }
+
     public function publisher() : BelongsTo
     {
         return $this->belongsTo(Publisher::class)->withTrashed()->withDefault(['value'=>'']);
     }
-    public function author() : BelongsTo
-    {
-        return $this->belongsTo(Author::class)->withTrashed()->withDefault(['value'=>'']);
-    }
+    // public function author() : BelongsTo
+    // {
+    //     return $this->belongsTo(Author::class)->withTrashed()->withDefault(['value'=>'']);
+    // }
+    
     public function category() : BelongsTo
     {
         return $this->belongsTo(Category::class)->withTrashed()->withDefault(['value'=>'']);

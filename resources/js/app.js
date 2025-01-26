@@ -52,6 +52,7 @@ window.Toast = Toast;
 // Import components
 import VueProgressBar from "@aacassandra/vue3-progressbar";
 import Loader from "./components/Loader.vue";
+import TableLoader from "./components/TableLoader.vue";
 import SaveButton from "./components/SaveButton.vue";
 import SaveChangesButton from "./components/SaveChangesButton.vue";
 import RefreshButton from "./components/RefreshButton.vue";
@@ -74,6 +75,7 @@ const options = {
 
 const app = createApp(App);
 app.component("loader", Loader);
+app.component("TableLoader", TableLoader);
 app.component("LoadingSpinner", LoadingSpinner);
 app.component("NoRecordFound", NoRecordFound);
 app.component("pagination", Bootstrap5Pagination);

@@ -34,8 +34,8 @@ class PurchaseController extends Controller
 
     public function index()
     {
-#permission verfy
-$this->webspice->permissionVerify('purchase.manage');
+        #permission verfy
+        $this->webspice->permissionVerify('purchase.manage');
         try {
             $paginate = request('paginate', 5);
             $searchTerm = request('search', '');

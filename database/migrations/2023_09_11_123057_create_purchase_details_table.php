@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('vat_percentage',5,2);
             $table->float('vat_amount',8,2);
             $table->double('net_sub_total',10,2);
+            $table->string('flag',100);
             $table->foreign('purchase_id')->references('id')->on('purchases')->onDelete('cascade');
             $table->foreign('book_id')->references('id')->on('books')->onDelete('cascade');
             

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CategoryExport;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -93,7 +94,7 @@ class CategoryController extends Controller
         try {
             // $this->categories->create($data);
             $input = $request->all();
-           
+            $input['slug'] = Str::slug($request->category_name);
             $input['created_by'] = $this->webspice->getUserId();
           
             $this->categories->create($input);

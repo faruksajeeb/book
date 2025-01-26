@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Image;
+use DB;
 
 class BookController extends Controller
 {
@@ -53,21 +54,37 @@ class BookController extends Controller
                 'id',
                 'title',
                 'publisher_id',
-                'author_id',
                 'category_id',
                 'sub_category_id',
                 'stock_quantity',
                 'price',
             ]));
 
-            $books = Book::with(['publisher', 'author', 'category', 'sub_category'])->when(count($filled) > 0, function ($query) use ($filled) {
-                foreach ($filled as $column => $value) {
-                    $query->where($column, 'LIKE', '%' . $value . '%');
-                }
-
-            })->when(request('search', '') != '', function ($query) use ($searchTerm) {
-                $query->search(trim($searchTerm));
-            })->orderBy($sortField, $sortDirection)->paginate($paginate);
+            $books = Book::with(['publisher', 'authors', 'category', 'sub_category'])
+                ->when(count($filled) > 0, function ($query) use ($filled) {
+                    foreach ($filled as $column => $value) {
+                        $query->where($column, 'LIKE', '%' . $value . '%');
+                    }
+                })
+                ->when(request('search', '') != '', function ($query) use ($searchTerm) {
+                    $query->search(trim($searchTerm));
+                })
+                // ->when(!empty($searchTerm), function ($query) use ($searchTerm) {
+                //     $query->where(function ($q) use ($searchTerm) {
+                //         $q->whereHas('authors', function ($authorQuery) use ($searchTerm) {
+                //             $authorQuery->where('author_name', 'LIKE', '%' . $searchTerm . '%');
+                //         });
+                //     });
+                // })
+                ->when(request('author_id'), function ($query) {
+                    // If author_id is provided, filter books by specific authors
+                    $authorIds = is_array(request('author_id')) ? request('author_id') : [request('author_id')];
+                    $query->whereHas('authors', function ($authorQuery) use ($authorIds) {
+                        $authorQuery->whereIn('id', $authorIds);
+                    });
+                })
+                ->orderBy($sortField, $sortDirection)
+                ->paginate($paginate);
 
             return response()->json($books);
         } catch (Exception $e) {
@@ -83,18 +100,33 @@ class BookController extends Controller
     {
         #permission verfy
         $this->webspice->permissionVerify('book.create');
-
-        // Unique check __> book name, author, publisher
-
         $request->validate(
             [
-                'title' => ['required', 'min:1', 'max:1000', Rule::unique('books')->where(function ($query) use ($request) {
-                    return $query->where('title', $request->title)
-                        ->where('publisher_id', $request->publisher_id)
-                        ->where('author_id', $request->author_id);
-                })],
+                'title' => [
+                    'required',
+                    'min:1',
+                    'max:1000',
+                    Rule::unique('books')
+                        ->where(function ($query) use ($request) {
+                            return $query->where('publisher_id', $request->publisher_id);
+                        }),
+                    function ($attribute, $value, $fail) use ($request) {
+                        // Check if the combination of title, publisher_id, and author_id already exists
+                        $exists = DB::table('book_author')
+                            ->join('books', 'books.id', '=', 'book_author.book_id')
+                            ->where('books.title', $value)
+                            ->where('books.publisher_id', $request->publisher_id)
+                            //->whereIn('book_author.author_id', $request->selected_authors)
+                            ->exists();
+
+                        if ($exists) {
+                            $fail('The combination of title, publisher_id, and selected_authors has already been taken.');
+                        }
+                    },
+                ],
                 'publisher_id' => 'required',
-                'author_id' => 'required',
+                'selected_authors' => 'required|array|min:1',
+                'selected_authors.*' => 'exists:authors,id',
                 'buying_discount_percentage' => 'required|numeric',
                 'selling_discount_percentage' => 'required|numeric',
                 'buying_vat_percentage' => 'required|numeric',
@@ -104,14 +136,14 @@ class BookController extends Controller
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],
             [
-                'title.unique' => 'The book (title,publisher_id,author_id) has already been taken.',
+                'title.unique' => 'The book (title,publisher_id,selected_authors) has already been taken.',
             ]
         );
 
         try {
-            // $this->books->create($data);
-            $input = $request->all();
-            // dd($input);
+            // $input = $request->all();
+            $input = $request->except(['photo', 'selected_authors']);
+            
             if ($request->hasFile('photo')) {
                 $image = Image::make($request->file('photo'));
                 $imageName = time() . '-' . $request->file('photo')->getClientOriginalName();
@@ -133,10 +165,16 @@ class BookController extends Controller
                     $input['photo'] = $imageName;
                 }
             }
-            $input['author_id'] = implode(",",$request->author_id);
+            
             $input['created_by'] = $this->webspice->getUserId();
-            // dd($input);
-            $this->books->create($input);
+         
+            // Create the book entry
+            $book = $this->books->create($input);
+
+            // Attach authors to the book
+            if ($request->has('selected_authors')) {
+                $book->authors()->attach($request->selected_authors); // Proper many-to-many relationship handling
+            }
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
             return response()->json(
@@ -151,7 +189,7 @@ class BookController extends Controller
     public function show($id)
     {
         try {
-            $book = Book::with(['publisher', 'author', 'category', 'sub_category'])->find($id);
+            $book = Book::with(['publisher', 'authors', 'category', 'sub_category'])->find($id);
             return $book;
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
@@ -165,6 +203,7 @@ class BookController extends Controller
     public function update(Request $request, $id)
     {
         // dd($request->isMethod('put'));
+        // dd($request->all());
         #permission verfy
         $this->webspice->permissionVerify('book.edit');
 
@@ -173,13 +212,33 @@ class BookController extends Controller
 
         $request->validate(
             [
-                'title' => ['required', 'min:1', 'max:1000', Rule::unique('books')->ignore($id, 'id')->where(function ($query) use ($request) {
-                    return $query->where('title', $request->title)
-                        ->where('publisher_id', $request->publisher_id)
-                        ->where('author_id', $request->author_id);
-                })],
+                'title' => [
+                    'required',
+                    'min:1',
+                    'max:1000',
+                    Rule::unique('books')
+                        ->ignore($id) // Ignore the current book being updated
+                        ->where(function ($query) use ($request) {
+                            return $query->where('publisher_id', $request->publisher_id);
+                        }),
+                    function ($attribute, $value, $fail) use ($request, $id) {
+                        // Check if the combination of title, publisher_id, and author_id already exists
+                        $exists = DB::table('book_author')
+                            ->join('books', 'books.id', '=', 'book_author.book_id')
+                            ->where('books.title', $value)
+                            ->where('books.publisher_id', $request->publisher_id)
+                            ->whereIn('book_author.author_id', $request->selected_authors)
+                            ->where('books.id', '<>', $id) // Exclude the current book being updated
+                            ->exists();
+
+                        if ($exists) {
+                            $fail('The combination of title, publisher_id, and author_id has already been taken.');
+                        }
+                    },
+                ],
                 'publisher_id' => 'required',
-                'author_id' => 'required',
+                'selected_authors' => 'required|array',
+                'selected_authors.*' => 'exists:authors,id',
                 'buying_discount_percentage' => 'required',
                 'selling_discount_percentage' => 'required',
                 'buying_vat_percentage' => 'required',
@@ -188,11 +247,12 @@ class BookController extends Controller
                 'publication_year' => 'required',
             ],
             [
-                'title.unique' => 'The book (title,publisher_id,author_id) has already been taken.',
+                'title.unique' => 'The book (title,publisher_id,selected_authors) has already been taken.',
             ]
         );
         try {
-            $input = $request->all();
+            $input = $request->except(['photo', 'selected_authors']);
+            
             if ($request->hasFile('photo')) {
                 $image = Image::make($request->file('photo'));
                 $imageName = time() . '-' . $request->file('photo')->getClientOriginalName();
@@ -222,9 +282,14 @@ class BookController extends Controller
                     $input['photo'] = $imageName;
                 }
             }
-            $input['author_id'] = implode(",",$request->author_id);
+            
             $input['updated_by'] = $this->webspice->getUserId();
-            Book::where('id', $id)->update($input);
+            // Fetch the book by ID and update
+            $book = Book::findOrFail($id);
+            $book->update($input); // Update book details
+
+            // Sync authors for many-to-many relationship
+            $book->authors()->sync($request->selected_authors);
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
             return response()->json(
@@ -232,7 +297,7 @@ class BookController extends Controller
                     'error' => $e->getMessage(),
                 ], 401);
         }
-        // return redirect()->route('books.index');
+        
     }
 
     public function destroy($id)

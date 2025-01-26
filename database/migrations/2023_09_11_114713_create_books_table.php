@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('isbn')->nullable()->comment('International Standard Book Number');
-            $table->bigInteger('author_id')->unsigned();
+            // $table->bigInteger('author_id')->unsigned();
             $table->bigInteger('category_id')->unsigned();
             $table->bigInteger('sub_category_id')->unsigned();
             $table->string('genre')->nullable();
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('deleted_by')->nullable();
-            $table->foreign('author_id')->references('id')->on('authors')->onDelete('cascade');
+            // $table->foreign('author_id')->references('id')->on('authors')->onDelete('cascade');
             $table->foreign('publisher_id')->references('id')->on('publishers')->onDelete('cascade');
         });
     }

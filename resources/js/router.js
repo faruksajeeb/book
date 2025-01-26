@@ -134,6 +134,7 @@ function guard(to, from, next) {
   
   function checkPermissions(to, next) {
     const requiredPermissions = to.meta.requiredPermissions || [];
+    // console.log(requiredPermissions);
     if (store.getters.hasPermission(requiredPermissions)) {
       next();
     } else {

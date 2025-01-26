@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('category_name')->unique();
-            $table->string('slug')->unique();
+            $table->string('slug')->unique()->nullable();
             $table->string('image')->nullable();
             $table->boolean('is_popular')->default(0)->nullable();    
             $table->boolean('status')->default(1);           

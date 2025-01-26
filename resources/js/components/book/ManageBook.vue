@@ -217,7 +217,11 @@
                     </td>
                     <td class="text-nowrap"><a  @click="openModal(book.id)" href="#" data-toggle="modal" data-target="#recordModal">{{ book.title }}</a></td>
                     <td class="text-nowrap">{{ book.publisher.publisher_name }}</td>
-                    <td class="text-nowrap">{{ book.author.author_name }}</td>
+                    <td class="text-nowrap">
+                      <span v-for="(author, index) in book.authors" :key="author.id">
+                        {{ author.author_name }}<span v-if="index < book.authors.length - 1">, </span>
+                      </span>
+                    </td>
                     <td class="text-nowrap">{{ book.category.category_name }}</td>
                     <td class="text-nowrap">{{ book.sub_category.sub_category_name }}</td>
                     <td class="text-nowrap">{{ book.stock_quantity }}</td>
@@ -330,16 +334,8 @@ export default {
   },
   async created() {
     this.fetchCategories();
-    this.authors = this.$store.getters.getAuthors;
-    if (this.authors.length == 0) {
-      const response = await axios.get("/api/get-authors");
-      this.authors = response.data;
-    }
-    this.publishers = this.$store.getters.getPublishers;
-    if (this.publishers.length == 0) {
-      const response = await axios.get("/api/get-publishers");
-      this.publishers = response.data;
-    }
+    await this.fetchData("authors", "/api/get-authors");
+    await this.fetchData("publishers", "/api/get-publishers");
   },
   mounted() {
     this.filterFields = { ...this.params };
@@ -365,6 +361,24 @@ export default {
   },
   methods: {
     ...mapActions(["fetchCategories"]),
+    async fetchData(property, apiEndpoint) {
+    try {
+      // Check if data exists in the store
+      this[property] = this.$store.getters[`get${this.capitalize(property)}`];
+      if (this[property].length === 0) {
+        const response = await axios.get(apiEndpoint);
+        this[property] = response.data;
+        // Optionally update the store with fetched data
+        this.$store.commit(`set${this.capitalize(property)}`, this[property]);
+      }
+    } catch (error) {
+      console.error(`Failed to fetch ${property}:`, error);
+      this.$toast.error(`Failed to load ${property}. Please try again.`);
+    }
+  },
+  capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  },
     async getBooks(page = 1) {
       this.isLoading = true;
       await axios

@@ -149,8 +149,8 @@
                       /></td>
                         
                         <td>{{ product.price }}</td>
-  <td v-if="product.stock_quantity  >= 1 "><span class="badge badge-success">Available </span></td>
-   <td v-else=" "><span class="badge badge-danger">Stock Out </span></td>
+                          <td v-if="product.stock_quantity  >= 1 "><span class="badge badge-success">Available </span></td>
+                          <td v-else=" "><span class="badge badge-danger">Stock Out </span></td>
                          <td>{{ product.stock_quantity }}</td>
              
                       </tr>
@@ -202,18 +202,23 @@
                         <th>Name</th>
                         <th>Qty.</th>
                       </thead>
-                      <tbody  v-if="stock_alerts.length>0">
-                        <tr v-for="item in stock_alerts">
-                            <td>{{item.title}}</td>  
-                            <td class="text-center">{{item.stock_quantity}}</td>  
+                      <tbody v-if="!isLoading && stock_alerts.length > 0">
+                        <tr v-for="item in stock_alerts" :key="item.id">
+                          <td>{{ item.title }}</td>
+                          <td class="text-center">{{ item.stock_quantity }}</td>
+                        </tr>
+                      </tbody>
+                      <tbody v-else-if="isLoading">
+                        <tr>
+                          <td colspan="2">
+                            <LoadingSpinner />
+                          </td>
                         </tr>
                       </tbody>
                       <tbody v-else>
-                      <tr>
-                        <td colspan="2">
-                          <LoadingSpinner/>
-                        </td>
-                      </tr>
+                        <tr>
+                          <td colspan="2" class="text-center">No stock alerts found.</td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
@@ -344,6 +349,7 @@ export default {
       totalCustomer:0,
       out_of_stocks:[],
       stock_alerts:[],
+      isLoading: true, 
     }
   },
   created() {
@@ -385,9 +391,18 @@ export default {
         .catch()
      },
      async StockAlerts(){
-      await axios.get('/api/report/stock-alerts')
-        .then(({data}) => (this.stock_alerts = data))
-        .catch()
+      this.isLoading = true; 
+      await axios
+        .get('/api/report/stock-alerts')
+        .then(({ data }) => {
+          this.stock_alerts = data; // Update stock alerts
+        })
+        .catch((error) => {
+          console.error('Error fetching stock alerts:', error); // Handle any errors
+        })
+        .finally(() => {
+          this.isLoading = false; // Set loading state to false after API call completes
+        });
      },
 
    }

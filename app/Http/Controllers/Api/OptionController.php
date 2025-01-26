@@ -27,10 +27,10 @@ class OptionController extends Controller
 
     public function index()
     {
-#permission verfy
-$this->webspice->permissionVerify('option.manage');
+        #permission verfy
+        $this->webspice->permissionVerify('option.manage');
         try {
-            $paginate = request('paginate', 5);
+            $paginate = request('paginate', 10);
             $searchTerm = request('search', '');
 
             $sortField = request('sort_field', 'created_at');
@@ -225,7 +225,7 @@ $this->webspice->permissionVerify('option.manage');
         return response()->json($data);
     }
     public function getPaymentMethods(){
-        $data = Option::where('option_group_id',5)->where('status', 1)->get();
+        $data = Option::where('option_group_id',2)->where('status', 1)->get();
         return response()->json($data);
     }
 

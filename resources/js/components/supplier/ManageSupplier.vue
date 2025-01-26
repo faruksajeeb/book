@@ -7,7 +7,7 @@
           <div
             class="card-header py-3 "
           >
-            <h3 class="m-0 font-weight-bold" title="">Supplier List          </h3>
+            <h3 class="m-0 font-weight-bold" title="">Supplier List</h3>
               <p class="text-secondary m-0">Stores information about book suppliers, including their names, addresses, and contact details.</p>
             </div>
           <div class="card-body p-0 m-0">

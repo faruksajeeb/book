@@ -40,36 +40,16 @@
                     />
                     <HasError :form="form" field="title" />
                   </div>
-                   <Select2 v-model="myValue" :options="myOptions" :settings="{ settingOption: value, settingOption: value }" @change="myChangeEvent($event)" @select="mySelectEvent($event)" />
-    <h4>Value: {{ myValue }}</h4>
-                  <div class="input-group mb-2 row mx-0 px-0">
-                   
-                    <div class="input-group-prepend px-0 col-md-4 mx-0">
-                      <label class="input-group-text col-md-12" for="inputGroupSelect01"
-                        >Author
-                        <div class="text-danger">*</div></label
-                      >
-                    </div>               
-                    <select
-                      class="custom-select mx-0 pe-0 select2"
-                      id="inputGroupSelect01"
-                      v-model="form.author_id"
-                      :class="{ 'is-invalid': form.errors.has('author_id') }"
-                      multiple
-                    >
-                   
-                      <option value="" disabled selected>Choose...</option>
-                      <option
-                        :value="author.id"
-                        v-for="author in authors"
-                        :key="author.id"
-                      >
-                        {{ author.author_name }}
-                      </option>
-                   
-                    </select>
-                
-                    <HasError :form="form" field="author_id" />
+                  <div class="mb-2 row pe-4">
+                    <multiselect
+                      v-model="form.selected_authors"
+                      :options="authors"
+                      :multiple="true"
+                      track-by="id"
+                      label="author_name"
+                      placeholder="Select authors"
+                    />
+                    <HasError :form="form" field="selected_authors" />
                   </div>
                   <div class="input-group mb-2 row mx-0 px-0">
                     <div class="input-group-prepend px-0 col-md-4 mx-0">
@@ -351,31 +331,30 @@
   </div>
 </template>
 <script type="text/javascript">
-import $ from 'jquery';
-import 'select2';
+import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.min.css";
 
-import Select2 from 'vue3-select2-component';
 import { mapActions } from "vuex";
 export default {
 components: {
-    Select2
+    Multiselect
   },
   data() {
     return {
-myValue: '',
-            myOptions: ['op1', 'op2', 'op3'],
+      myValue: '',
+      myOptions: ['op1', 'op2', 'op3'],
       isSubmitting: false,
       imageUrl: null,
       book: false,
       sub_categories: [],
-      authors: [],
+      authors: [], // List of all authors (fetched from API)
       publishers: [],
       form: new Form({
         title: "",
         isbn: "",
         genre: "",
         price: "",
-        author_id: "",
+        selected_authors: [],
         publisher_id: "",
         category_id: "",
         sub_category_id: "",
@@ -403,6 +382,8 @@ myValue: '',
       const response = await axios.get("/api/get-authors");
       this.authors = response.data;
     }
+    
+
     this.publishers = this.$store.getters.getPublishers;
     if (this.publishers.length == 0) {
       const response = await axios.get("/api/get-publishers");
@@ -416,7 +397,7 @@ myValue: '',
       this.form.title = response.data.title;
       this.form.isbn = response.data.isbn;
       this.form.photo = response.data.photo;
-      this.form.author_id = response.data.author_id;
+      this.form.selected_authors = response.data.authors;
       this.form.publisher_id = response.data.publisher_id;
       this.form.category_id = response.data.category_id;
       if(response.data.category_id){
@@ -481,7 +462,9 @@ myValue: '',
     },
     async submitForm() {
       this.isSubmitting = true;
+      this.form.selected_authors = this.form.selected_authors.map((author) => author.id);
       if (this.isNew) {
+        
         await this.form
           .post("/api/books", this.form)
           .then(() => {
@@ -508,7 +491,10 @@ myValue: '',
       } else {
         try {
           await this.form
-            .post(`/api/books/${this.$route.params.id}`, this.form)
+            .post(`/api/books/${this.$route.params.id}`, {
+              ...this.form,
+              
+            })
             .then((response) => {
               Notification.success("book info updated");
               this.$router.push("/books");

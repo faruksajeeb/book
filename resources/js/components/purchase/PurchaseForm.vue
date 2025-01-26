@@ -20,7 +20,7 @@
               <!-- <LoadingSpinner /> -->
             </div>
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-7">
                 <input
                   type="text"
                   class="form-control"
@@ -67,10 +67,9 @@
                               ৳ {{ book.price }}
                             </div>
                             <div class="py-0 text-muted text-xs text-center">
-                              <span class="text-success mr-2"
-                                ><i class="fa fa-pen"></i>
-                                {{ book.author.author_name }}</span
-                              >
+                              <span v-for="(author, index) in book.authors" :key="author.id"> <i class="fa fa-pen"></i>
+                                {{ author.author_name }}<span v-if="index < book.authors.length - 1">, </span>
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -108,7 +107,7 @@
                 </div>
               </div>
               <div
-                class="col-md-6 py-2"
+                class="col-md-5 py-2"
                 style="border-radius: 5px; border: 2px solid #c9f4aa"
               >
                 <AlertError :form="form" />
@@ -122,7 +121,7 @@
                   <div class="input-group mb-2 row mx-0 px-0">
                     <div class="input-group-prepend px-0 col-md-4 mx-0">
                       <label class="input-group-text col-md-12" for="inputGroupSelect01"
-                        >Supplier
+                        ><i class="fa fa-user"> Supplier</i> 
                         <div class="text-danger">*</div></label
                       >
                     </div>
@@ -856,38 +855,34 @@ export default {
     },
     async submitForm() {
       this.isSubmitting = true;
-      console.log(this.cartItems);
+      console.log(this.form);
       // console.log(this.form.cartItems);
       if (this.isNew) {
-        await this.form
-          .post("/api/purchases", {
-            params: {
-              cart_items: this.cartItems,
-              courtesy_cart_items: this.courtesyCartItems,
-              ...this.form,
-            },
-          })
-          .then(() => {
-            this.$router.push({ name: "purchases" });
-            Notification.success(`Create purchase successfully!`);
-          })
-          .catch((error) => {
-            // console.log(error);
-            if (error.response.status === 422) {
-              this.errors = error.response.data.errors;
-              Notification.error("Validation Errors!");
-            } else if (error.response.status === 401) {
-              // statusText = "Unpurchaseized";
-              this.errors = {};
-              Notification.error(error.response.data.error);
-            } else {
-              Notification.error(error.response.statusText);
-            }
-          })
-          .finally(() => {
-            // always executed;
-            this.isSubmitting = false;
-          });
+        try {
+          const payload = {
+            cart_items: this.cartItems,
+            courtesy_cart_items: this.courtesyCartItems,
+            ...this.form, // Spread other form fields
+          };
+
+          // Make the POST request with the correct data structure
+          await axios.post("/api/purchases", payload);
+
+          // Navigate and notify
+          this.$router.push({ name: "purchases" });
+          Notification.success("Created purchase successfully!");
+        } catch (error) {
+          // Log error response to debug
+          if (error.response && error.response.data) {
+            console.error("Error:", error.response.data.errors);
+            Notification.error("Failed to create purchase. Check your input.");
+          } else {
+            console.error("Unexpected error:", error);
+            Notification.error("An unexpected error occurred.");
+          }
+        } finally {
+          this.isSubmitting = false;
+        }
       } else {
         try {
           await this.form

@@ -13,5 +13,16 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    
+    server: {
+        host: true, // Allow external connections
+        port: 5173, // Optional: Explicitly set port
+        cors: {
+          origin: 'https://book.test', // Allow only your Laravel app
+          credentials: true,          // Allow cookies or credentials
+        },
+        hmr: {
+          protocol: 'ws',
+          host: 'localhost', // Use localhost or your development host
+        },
+      },
 });

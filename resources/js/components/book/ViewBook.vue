@@ -17,7 +17,7 @@
         <div class="modal-body">
           <!-- Display record details here -->
          
-          <div v-if="record.author">
+          <div v-if="record.authors">
             <h4>Book Title: {{ record.title }}</h4>
             <div class="row">
               <div class="col-md-4">
@@ -36,7 +36,11 @@
                   </tr>
                   <tr>
                     <td>Author</td>
-                    <td>{{ record.author.author_name }}</td>
+                    <td>
+                      <span v-for="(author, index) in record.authors" :key="author.id">
+                        {{ author.author_name }}<span v-if="index < record.authors.length - 1">, </span>
+                      </span>
+                    </td>
                   </tr>
                   <tr>
                     <td>Publisher</td>
