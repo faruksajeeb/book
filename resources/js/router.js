@@ -64,6 +64,7 @@ import ManagePublisher from "./components/master_data/publisher/ManagePublisher.
 
 // Book Files
 import BookForm from "./components/book/BookForm.vue";
+import EditBookForm from "./components/book/EditBookForm.vue";
 import ManageBook from "./components/book/ManageBook.vue";
 
 // Purchase Files

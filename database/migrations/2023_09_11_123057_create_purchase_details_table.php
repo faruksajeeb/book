@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('purchase_details', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('purchase_id')->unsigned();
-            $table->bigInteger('book_id')->unsigned();
+            $table->foreignId('purchase_id')->constrained()->onDelete('cascade');
+            $table->foreignId('book_id')->constrained()->onDelete('cascade');
+            $table->foreignId('variant_id')->nullable()->constrained('product_variants')->onDelete('cascade'); 
             $table->integer('quantity');
             $table->float('unit_price',8,2);
             $table->double('sub_total',10,2);
@@ -24,8 +25,6 @@ return new class extends Migration
             $table->float('vat_amount',8,2);
             $table->double('net_sub_total',10,2);
             $table->string('flag',100);
-            $table->foreign('purchase_id')->references('id')->on('purchases')->onDelete('cascade');
-            $table->foreign('book_id')->references('id')->on('books')->onDelete('cascade');
             
         });
     }

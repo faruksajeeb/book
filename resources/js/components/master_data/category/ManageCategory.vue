@@ -208,7 +208,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 10,
         id: "",
         category_name: "",
         sort_field: "created_at",

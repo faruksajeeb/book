@@ -325,9 +325,11 @@
                 <div v-if="hasVariants">
                     <!-- Variants -->
                     <h4>Variants</h4>
+                    
                     <div v-for="(variant, index) in form.variants" :key="index" class="card mb-2">
                         <div class="card-header d-flex justify-content-between align-items-center">
                           <h5 class="mb-0 fw-bold">Variant {{ index + 1 }}</h5>
+                         
                           <button 
                             type="button" 
                             class="btn btn-sm btn-danger"
@@ -384,7 +386,8 @@
                                         >
                                           {{ value.value }}
                                         </option>
-                                  </select>
+                                  </select> 
+                                  
                                 </div>
                             </div>
                         </div>
@@ -497,6 +500,7 @@ components: {
     if (!this.isNew) {
       const response = await axios.get(`/api/books/${this.$route.params.id}`);
 
+      // console.log(response.data);
       const product = response.data;
       this.form.title = product.title;
       this.form.isbn = product.isbn;
@@ -529,6 +533,7 @@ components: {
             }, {}),
         }));
       this.hasVariants = product.variants && product.variants.length > 0;
+    
     }
   },
   methods: {

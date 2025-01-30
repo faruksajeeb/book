@@ -20,77 +20,35 @@
               <!-- <LoadingSpinner /> -->
             </div>
             <div class="row">
-              <div class="col-md-7">
+              <div class="col-md-6" >
                 <input
                   type="text"
-                  class="form-control"
+                  class="form-control form-control-lg full-width"
                   placeholder="Search by publication, author, book name, isbn or genre..."
                   v-model="search"
                 />
                 <div class="categories my-2">
                   <a
                     href="#"
-                    class="p-2 m-1 text-danger text-nowrap"
+                    class="p-2 m-1 my-text-primary text-nowrap"
                     @click="getCatWiseBook('')"
                     >All Category</a
                   >
                   <a
                     href="#"
-                    class="p-2 m-1 text-danger text-nowrap"
+                    class="p-2 m-1 my-text-primary text-nowrap"
                     @click="getCatWiseBook(category.id)"
                     v-for="category in categories"
                     >{{ category.category_name }}</a
                   >
                 </div>
-                <div class="row product-view" v-if="books && paginator.totalRecords > 0">
-                  <div class="col-xl-4 col-md-6 mb-2 px-1" v-for="book in books.data">
-                    <div class="card h-100">
-                      <div class="card-body">
-                        <div class="row align-items-center">
-                          <div class="col mr-2">
-                            <div
-                              class="text-xs font-weight-bold text-center text-uppercase mb-1"
-                            >
-                              {{ book.title }}
-                            </div>
-                            <div class="text-center">
-                              <img
-                                class="text-center"
-                                :src="
-                                  `${publicPath}assets/img/book/thumbnail/` + book.photo
-                                "
-                                alt=""
-                                width="100"
-                              />
-                            </div>
-                            <div class="text-center font-weight-bold text-gray-800">
-                              ৳ {{ book.price }}
-                            </div>
-                            <div class="py-0 text-muted text-xs text-center">
-                              <span v-for="(author, index) in book.authors" :key="author.id"> <i class="fa fa-pen"></i>
-                                {{ author.author_name }}<span v-if="index < book.authors.length - 1">, </span>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="card-footer text-center py-1">
-                        <button
-                          @click="addToCart(book)"
-                          :class="`btn btn-sm m-1  my-btn-primary addToCart${book.id}`"
-                        >
-                          <i class="fa fa-plus"></i> Add To Cart
-                        </button>
-                        <button
-                          @click="addToCourtesyCart(book)"
-                          :class="`btn btn-sm m-1  my-btn-danger addToCourtesyCart${book.id}`"
-                        >
-                          <i class="fa fa-plus"></i> সৌজন্য কপি
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <SearchResult
+                  v-if="searchResults.length"
+                  :searchResults="searchResults"
+                  @add-to-cart="handleAddToCart"
+                  :cartStatus="cartStatus"
+                  />
+                
                 <div v-else class="text-center loading-section">
                   <loader v-if="isLoading"></loader>
                   <NoRecordFound v-else />
@@ -107,7 +65,7 @@
                 </div>
               </div>
               <div
-                class="col-md-5 py-2"
+                class="col-md-6 py-2"
                 style="border-radius: 5px; border: 2px solid #c9f4aa"
               >
                 <AlertError :form="form" />
@@ -163,6 +121,8 @@
                     />
                     <HasError :form="form" field="purchase_date" />
                   </div>
+
+                  <!-- <PurchaseCart :items="purchaseCartItems" /> -->
                   <fieldset class="reset my-1 p-1" style="background-color: #c9f4aa">
                     <legend class="text-white my-btn-primary p-1 reset">
                       ক্রয়কৃত কপি:
@@ -170,14 +130,16 @@
                     <table class="table table-sm">
                       <thead>
                         <th class="text-left px-1">Book Name</th>
+                        <th class="text-left px-1">Variant</th>
                         <th class="text-right px-1">Unit Price</th>
                         <th class="text-center px-1">Qty</th>
                         <th class="text-right px-1">Sub Total</th>
                         <th style="width: 50px"></th>
                       </thead>
                       <tbody v-if="cartItems.length > 0">
-                        <tr v-for="(item, index) in cartItems" :key="index">
+                        <tr v-for="(item, index) in cartItems" :key="`${item.id}-${item.variantId}`">
                           <td class="px-1">{{ item.title }}</td>
+                          <td class="px-1">{{ item.variant ? formatVariantLabel(item.variant) : "No Variant" }}</td>
                           <td class="px-1 text-right">
                             <input
                               type="number"
@@ -205,13 +167,13 @@
                           </td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="2">TOTAL</td>
+                          <td class="fw-bold px-1" colspan="3">TOTAL</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">{{ calculateTotal() }}</td>
                           <td class="fw-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="text-bold px-1" colspan="2">
+                          <td class="text-bold px-1" colspan="3">
                             Discount Percentage(%)
                           </td>
                           <td class="text-bold px-1">
@@ -228,7 +190,7 @@
                           <td class="text-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="text-bold px-1" colspan="2">Vat Rate(%)</td>
+                          <td class="text-bold px-1" colspan="3">Vat Rate(%)</td>
                           <td class="text-bold px-1">
                             <input
                               type="number"
@@ -244,7 +206,7 @@
                           <td class="text-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="2">NET TOTAL</td>
+                          <td class="fw-bold px-1" colspan="3">NET TOTAL</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">
                             {{ calculateNetTotal() }}
@@ -252,7 +214,7 @@
                           <td class="fw-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="2">Pay Amount</td>
+                          <td class="fw-bold px-1" colspan="3">Pay Amount</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">
                             <input
@@ -268,7 +230,7 @@
                           <td class="fw-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="2">Due Amount</td>
+                          <td class="fw-bold px-1" colspan="3">Due Amount</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">{{ dueAmount() }}</td>
                           <td class="fw-bold px-1"></td>
@@ -278,7 +240,7 @@
                             Payment Method
                             <div class="text-danger">*</div>
                           </td>
-                          <td class="fw-bold px-1" colspan="4">
+                          <td class="fw-bold px-1" colspan="5">
                             <select
                               name="payment_method"
                               v-model="form.payment_method"
@@ -293,7 +255,7 @@
                         </tr>
                         <tr v-show="payAmount > 0">
                           <td class="fw-bold px-1" colspan="1">Payment Descriptin</td>
-                          <td class="fw-bold px-1" colspan="4">
+                          <td class="fw-bold px-1" colspan="5">
                             <input
                               type="text"
                               class="form-control"
@@ -308,7 +270,7 @@
                         </tr>
                         <tr v-show="payAmount > 0">
                           <td class="fw-bold px-1" colspan="1">Paid By</td>
-                          <td class="fw-bold px-1" colspan="4">
+                          <td class="fw-bold px-1" colspan="5">
                             <input
                               type="text"
                               class="form-control"
@@ -322,7 +284,7 @@
                       </tbody>
                       <tbody v-else>
                         <tr>
-                          <td colspan="5" class="py-3 text-center">
+                          <td colspan="6" class="py-3 text-center">
                             <div v-if="!isNew && !purchase">
                               <LoadingSpinner />
                             </div>
@@ -341,14 +303,18 @@
                     <table class="table table-sm">
                       <thead>
                         <th class="text-left px-1">Book Name</th>
+                        <th class="text-left px-1">Variant</th>
                         <th class="text-right px-1">Unit Price</th>
                         <th class="text-center px-1">Qty</th>
                         <th class="text-right px-1">Sub Total</th>
                         <th style="width: 50px"></th>
                       </thead>
                       <tbody v-if="courtesyCartItems.length > 0">
-                        <tr v-for="(citem, index) in courtesyCartItems" :key="index">
+                        <tr v-for="(citem, index) in courtesyCartItems" :key="`${citem.id}-${citem.variantId}`">
                           <td class="px-1">{{ citem.title }}</td>
+                          <td class="px-1">{{ citem.variant ? formatVariantLabel(citem.variant) : "No Variant" }}</td>
+
+
                           <td class="px-1 text-right">
                             <input
                               type="number"
@@ -376,7 +342,7 @@
                           </td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="2">TOTAL</td>
+                          <td class="fw-bold px-1" colspan="3">TOTAL</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">
                             {{ calculateCourtesyTotal() }}
@@ -386,7 +352,7 @@
                       </tbody>
                       <tbody v-else>
                         <tr>
-                          <td colspan="5" class="py-3 text-center">
+                          <td colspan="6" class="py-3 text-center">
                             <div v-if="!isNew && !purchase">
                               <LoadingSpinner />
                             </div>
@@ -484,17 +450,22 @@
 <script type="text/javascript">
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
+import { reactive } from "vue";
+import SearchResult from "./SearchResult.vue";
 
 import { mapActions } from "vuex";
 export default {
+  components: { SearchResult },
+  setup() {
+    const cartStatus = reactive({}); // Vue 3 reactive object
+    return { cartStatus };
+  },
   data() {
     return {
       isSubmitting: false,
       isLoading: false,
       imageUrl: null,
       purchase: false,
-      cartItems: [],
-      courtesyCartItems: [],
       publicPath: window.publicPath,
       discountPercentage: 0, // Initialize with no discount
       vatPercentage: 0, // Initialize with no discount
@@ -533,7 +504,7 @@ export default {
         attach_file: null,
       }),
       params: {
-        paginate: 6,
+        paginate: 5,
         id: "",
         title: "",
         category_id: "",
@@ -541,6 +512,10 @@ export default {
         sort_direction: "desc",
       },
       search: "",
+      searchResults: [],
+      selectedVariants: {},
+      cartItems: [],
+      courtesyCartItems: [],
     };
   },
   watch: {
@@ -551,7 +526,7 @@ export default {
       deep: true,
     },
     search(val, old) {
-      if (val.length >= 3 || old.length >= 3) {
+      if (val.length >= 2 || old.length >= 2) {
         this.getBooks();
       }
     },
@@ -667,23 +642,29 @@ export default {
       this.form.attach_file = null;
     },
     async getBooks(page = 1) {
+        // if (this.search.length > 2) {
+        //     const response = await axios.get(`/api/books/search`, {
+        //     params: { query: this.searchQuery },
+        //     });
+        //     this.searchResults = response.data;
+        // } else {
+        //     this.searchResults = [];
+        // }
       this.isLoading = true;
       await axios
         .get("/api/books", {
           params: {
             page,
-            search: this.search.length >= 3 ? this.search : "",
+            search: this.search.length >= 2 ? this.search : "",
             ...this.params,
           },
         })
         .then((response) => {
-          // console.log(response);
+          this.searchResults = response.data.data;
           this.isLoading = false;
           this.books = response.data;
           this.paginator.totalRecords = response.data.total;
-          // if (response.data.total <= 0) {
-          //   document.querySelector(".loading-section").innerText = "No Record Found!.";
-          // }
+          
           this.paginator.from = response.data.from;
           this.paginator.to = response.data.to;
           this.paginator.current_page = response.data.current_page;
@@ -699,37 +680,64 @@ export default {
           this.isLoading = false;
         });
     },
+    formatVariantLabel(variant) {
+      if (!variant || !variant.attribute_options) return "No attributes";
+      return variant.attribute_options.map(opt => `${opt.attribute.name}: ${opt.value}`).join(", ");
+    },
     getCatWiseBook(categoryId) {
       this.params.category_id = categoryId;
     },
-    addToCart(book) {
-      const cartItem = this.cartItems.find((item) => item.id === book.id);
+    handleAddToCart({ book, variant, cartType }) {
+      const cartLabel = cartType === 'purchase' ? 'cart' : 'courtesy';
+      const variantId = variant ? variant.id : "no-variant";
+      const cartKey = `${book.id}-${variantId}-${cartType}`;
+      //alert(cartKey);
+      document.querySelector(`.addToCart${cartKey}`).innerHTML = `<i class="fa fa-check"></i> Added to ${cartLabel}`;
+      
+      if (cartType === "purchase") {
+        // this.directPurchaseCart.push(item);
+        this.addToPurchaseCart(book, variant)
+      } else if (cartType === "courtesy") {
+        this.addToCourtesyCart(book, variant)
+        // this.courtesyCart.push(item);
+      }
+    },
+    addToPurchaseCart(book, variant = null) {
+      const variantId = variant ? variant.id : "no-variant";
+      const cartItem = this.cartItems.find(
+        (item) => item.id === book.id && item.variantId === variantId
+      );
       if (cartItem) {
         Notification.success(`Item '${cartItem.title}' Qty. has been updated!`);
         cartItem.quantity++; // If the product already exists, increment its quantity
       } else {
-        Notification.success(`Item Added!`);
-
-        document.querySelector(`.addToCart${book.id}`).innerHTML =
-          '<i class="fa fa-check"></i> Added';
-        book.quantity = 1;
-        this.cartItems.push(book);
+        Notification.success(`Purchase Item Added!`);
+        const newItem = { ...book, quantity: 1, variantId };
+        if (variant) {
+          newItem.variant = variant;
+        }
+        this.cartItems.push(newItem);
       }
       // this.calculateTotal();
     },
-    addToCourtesyCart(book) {
-      const cartItem = this.courtesyCartItems.find((item) => item.id === book.id);
+    addToCourtesyCart(book, variant = null) {
+      const variantId = variant ? variant.id : "no-variant";
+
+      const cartItem = this.courtesyCartItems.find(
+        (item) => item.id === book.id && item.variantId === variantId
+      );
+
       if (cartItem) {
         Notification.success(`Item '${cartItem.title}' Qty. has been updated!`);
-        cartItem.quantity++; // If the product already exists, increment its quantity
+        cartItem.courtesy_quantity++;
       } else {
-        Notification.success(`Item Added!`);
+        Notification.success(`Courtesy Item Added!`);
+        const newItem = { ...book, courtesy_quantity: 1, unit_price: book.price, variantId };
 
-        document.querySelector(`.addToCourtesyCart${book.id}`).innerHTML =
-          '<i class="fa fa-check"></i> Added';
-        book.courtesy_quantity = 1;
-        book.unit_price = book.price;
-        this.courtesyCartItems.push(book);
+        if (variant) {
+          newItem.variant = variant;
+        }
+        this.courtesyCartItems.push(newItem);
       }
       // this.calculateTotal();
     },

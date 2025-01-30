@@ -27,7 +27,7 @@ export default {
                 },
               }
               ).then((response) => {
-                console.log(response.data.permissions);
+                //console.log(response.data.permissions);
                 return response.data.permissions;
             });
         }

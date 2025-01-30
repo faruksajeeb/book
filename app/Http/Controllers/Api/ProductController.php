@@ -72,6 +72,18 @@ class ProductController extends Controller
             $product->product_quantity = $request->product_quantity;
             $product->image = $image_url;
             $product->save();
+
+            // Create variants and map attributes
+            foreach ($request->variants as $variant) {
+                $productVariant = $product->variants()->create([
+                    'price' => $variant['price'],
+                    'stock_quantity' => $variant['stock_quantity'],
+                ]);
+
+                $attributeValueIds = array_column($variant['attributes'], 'id');
+                $productVariant->attributeOptions()->sync($attributeValueIds);
+            }
+
         } else {
             $product = new Product;
             $product->category_id = $request->category_id;

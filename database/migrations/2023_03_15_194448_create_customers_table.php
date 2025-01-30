@@ -21,11 +21,11 @@ class CreateCustomersTable extends Migration
             $table->string('address')->nullable();
             $table->string('photo')->nullable();
             $table->boolean('status')->default(true);
+            $table->softDeletesTz('deleted_at', $precision = 0);
            
             //$table->timestamps();
             $table->dateTimeTz('created_at', $precision = 0);
             $table->dateTimeTz('updated_at', $precision = 0);
-            $table->softDeletesTz('deleted_at', $precision = 0);
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('deleted_by')->nullable();

@@ -61,6 +61,11 @@ class Book extends Model
         });
     }
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
     public function authors()
     {
         return $this->belongsToMany(Author::class, 'book_author', 'book_id', 'author_id');

@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\Reports\CustomerPaymentReportController;
 use App\Http\Controllers\Api\Reports\SaleReportController;
 use App\Http\Controllers\Api\Reports\PurchaseReportController;
 use App\Http\Controllers\Api\Reports\StockReportController;
+use App\Http\Controllers\Api\ProductAttributeController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +65,7 @@ Route::group([
 
 Route::middleware('JWT')->group(function () {
     Route::get('get-books', [BookController::class, 'getBooks']);
+    Route::get('get-product-attributes', [ProductAttributeController::class, 'getProductAttributes']);
     Route::get('get-categories', [CategoryController::class, 'getCategories']);
     Route::get('get-option-groups', [OptionGroupController::class, 'getOptionGroups']);
     Route::get('get-roles', [RoleController::class, 'getRoles']);

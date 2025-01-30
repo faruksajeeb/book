@@ -52,7 +52,7 @@
 
             <div class="table-responsive">
               <table
-                class="table table-sm align-items-center table-flush"
+                class="table align-items-center table-flush"
                 style="min-height: 250px"
               >
                 <thead class="thead-light">
@@ -316,7 +316,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 10,
         id: "",
         title: "",
         publisher_id: "",

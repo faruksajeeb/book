@@ -60,7 +60,7 @@ class BookController extends Controller
                 'price',
             ]));
 
-            $books = Book::with(['publisher', 'authors', 'category', 'sub_category'])
+            $books = Book::with(['variants.attributeOptions.attribute','publisher', 'authors', 'category', 'sub_category'])
                 ->when(count($filled) > 0, function ($query) use ($filled) {
                     foreach ($filled as $column => $value) {
                         $query->where($column, 'LIKE', '%' . $value . '%');
@@ -98,6 +98,7 @@ class BookController extends Controller
 
     public function store(Request $request)
     {
+        //dd($request->all());
         #permission verfy
         $this->webspice->permissionVerify('book.create');
         $request->validate(
@@ -116,17 +117,17 @@ class BookController extends Controller
                             ->join('books', 'books.id', '=', 'book_author.book_id')
                             ->where('books.title', $value)
                             ->where('books.publisher_id', $request->publisher_id)
-                            //->whereIn('book_author.author_id', $request->selected_authors)
+                            //->whereIn('book_author.author_id', $request->author_id)
                             ->exists();
 
                         if ($exists) {
-                            $fail('The combination of title, publisher_id, and selected_authors has already been taken.');
+                            $fail('The combination of title, publisher_id, and author_id has already been taken.');
                         }
                     },
                 ],
                 'publisher_id' => 'required',
-                'selected_authors' => 'required|array|min:1',
-                'selected_authors.*' => 'exists:authors,id',
+                'author_id' => 'required|array|min:1',
+                'author_id.*' => 'exists:authors,id',
                 'buying_discount_percentage' => 'required|numeric',
                 'selling_discount_percentage' => 'required|numeric',
                 'buying_vat_percentage' => 'required|numeric',
@@ -136,13 +137,13 @@ class BookController extends Controller
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ],
             [
-                'title.unique' => 'The book (title,publisher_id,selected_authors) has already been taken.',
+                'title.unique' => 'The book (title,publisher_id,author_id) has already been taken.',
             ]
         );
 
         try {
             // $input = $request->all();
-            $input = $request->except(['photo', 'selected_authors']);
+            $input = $request->except(['photo', 'author_id']);
             
             if ($request->hasFile('photo')) {
                 $image = Image::make($request->file('photo'));
@@ -167,16 +168,34 @@ class BookController extends Controller
             }
             
             $input['created_by'] = $this->webspice->getUserId();
-         
+         // Begin a database transaction
+         \DB::beginTransaction();
             // Create the book entry
             $book = $this->books->create($input);
 
             // Attach authors to the book
-            if ($request->has('selected_authors')) {
-                $book->authors()->attach($request->selected_authors); // Proper many-to-many relationship handling
+            if ($request->has('author_id')) {
+                $book->authors()->attach($request->author_id); // Proper many-to-many relationship handling
             }
+
+             // Create variants and map attributes
+            foreach ($request->variants as $variant) {
+                $productVariant = $book->variants()->create([
+                    'sku' => $variant['sku'],
+                    'price' => $variant['price'],
+                    'stock_quantity' => $variant['stock_quantity'],
+                ]);
+
+                // $attributeValueIds = array_column($variant['attributes'], 'id');
+                $attributeValueIds = array_values($variant['attributes']);
+                
+                $productVariant->attributeOptions()->sync($attributeValueIds);
+            }
+            // Commit the database transaction
+            \DB::commit();
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
+            \DB::rollback();
             return response()->json(
                 [
                     'error' => $e->getMessage(),
@@ -189,7 +208,7 @@ class BookController extends Controller
     public function show($id)
     {
         try {
-            $book = Book::with(['publisher', 'authors', 'category', 'sub_category'])->find($id);
+            $book = Book::with(['variants.attributeOptions.attribute','publisher', 'authors', 'category', 'sub_category'])->find($id);
             return $book;
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
@@ -210,7 +229,7 @@ class BookController extends Controller
         # decrypt value
         // $id = $this->webspice->encryptDecrypt('decrypt', $id);
 
-        $request->validate(
+        $validated = $request->validate(
             [
                 'title' => [
                     'required',
@@ -227,7 +246,7 @@ class BookController extends Controller
                             ->join('books', 'books.id', '=', 'book_author.book_id')
                             ->where('books.title', $value)
                             ->where('books.publisher_id', $request->publisher_id)
-                            ->whereIn('book_author.author_id', $request->selected_authors)
+                            ->whereIn('book_author.author_id', $request->author_id)
                             ->where('books.id', '<>', $id) // Exclude the current book being updated
                             ->exists();
 
@@ -237,21 +256,26 @@ class BookController extends Controller
                     },
                 ],
                 'publisher_id' => 'required',
-                'selected_authors' => 'required|array',
-                'selected_authors.*' => 'exists:authors,id',
+                'author_id' => 'required|array',
+                'author_id.*' => 'exists:authors,id',
                 'buying_discount_percentage' => 'required',
                 'selling_discount_percentage' => 'required',
                 'buying_vat_percentage' => 'required',
                 'selling_vat_percentage' => 'required',
                 'price' => ['required', 'numeric', 'min:0.01'],
                 'publication_year' => 'required',
+                'variants' => 'nullable|array',
+                'variants.*.price' => 'required_with:variants|numeric',
+                'variants.*.stock_quantity' => 'required_with:variants|integer',
+                'variants.*.sku' => 'nullable',
+                'variants.*.attributes' => 'required_with:variants|array',
             ],
             [
-                'title.unique' => 'The book (title,publisher_id,selected_authors) has already been taken.',
+                'title.unique' => 'The book (title,publisher_id,author_id) has already been taken.',
             ]
         );
         try {
-            $input = $request->except(['photo', 'selected_authors']);
+            $input = $request->except(['photo', 'author_id']);
             
             if ($request->hasFile('photo')) {
                 $image = Image::make($request->file('photo'));
@@ -286,12 +310,41 @@ class BookController extends Controller
             $input['updated_by'] = $this->webspice->getUserId();
             // Fetch the book by ID and update
             $book = Book::findOrFail($id);
+
+            \DB::beginTransaction();
             $book->update($input); // Update book details
 
             // Sync authors for many-to-many relationship
-            $book->authors()->sync($request->selected_authors);
+            $book->authors()->sync($request->author_id);
+
+            // Handle variants only if they are present
+            if (!empty($validated['variants'])) {
+                // Remove existing variants and add new ones
+                $book->variants()->delete();
+
+                foreach ($validated['variants'] as $variantData) {
+                    $variant = $book->variants()->create([
+                        'price' => $variantData['price'],
+                        'sku' => $variantData['sku'],
+                        'stock_quantity' => $variantData['stock_quantity'],
+                    ]);
+                    
+                    // Remove null values
+                    $filteredArray = array_filter($variantData['attributes'], function ($value) {
+                        return !is_null($value);
+                    });
+                    // Sync attributes for the variant
+                    $attributeValueIds = array_values($filteredArray);
+                    $variant->attributeOptions()->sync($attributeValueIds);
+                }
+            } else {
+                // Ensure existing variants are removed for simple products
+                $book->variants()->delete();
+            }
+            \DB::commit();
         } catch (Exception $e) {
             // $this->webspice->message('error', $e->getMessage());
+            \DB::rollback();
             return response()->json(
                 [
                     'error' => $e->getMessage(),

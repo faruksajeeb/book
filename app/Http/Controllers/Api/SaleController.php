@@ -98,7 +98,7 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
+        
         #permission verfy
         $this->webspice->permissionVerify('sale.create');
         $request->validate(
@@ -116,7 +116,7 @@ class SaleController extends Controller
                 // 'cart_items.required' => 'The cart must contain at least one item.',
             ]
         );
-
+        
         try {
 
             if (($request->cart_items == null || count($request->cart_items) == 0) && ($request->courtesy_cart_items == null || count($request->courtesy_cart_items) <= 0)) {

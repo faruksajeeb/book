@@ -2,9 +2,13 @@
   <div class="row">
     <div class="col-md-12 offset-md-0">
       <div class="card shadow-sm my-2">
-        <div class="card-header py-0 my-bg-success">
-          <!-- <h3 class="text-white-900" v-if="isNew"><i class="fa fa-plus"></i> Add Sale</h3>
-          <h3 class="text-white-900" v-else><i class="fa fa-pencil"></i> Edit Sale</h3> -->
+        <div class="card-header py-2 my-bg-success">
+          <h3 class="text-white-900" v-if="isNew">
+            <i class="fa fa-plus"></i> Add Purchase
+          </h3>
+          <h3 class="text-white-900" v-else>
+            <i class="fa fa-pencil"></i> Edit Purchase
+          </h3>
           <!-- <p class="text-white m-0">
             ফরমের লাল তারকা (<span class="text-danger">*</span>) চিহ্নিত ঘরগুলো অবশ্যই
             পূরণ করুন। অন্যান্য ঘরগুলো পূরণ ঐচ্ছিক।
@@ -12,7 +16,7 @@
         </div>
         <div class="card-body p-3">
           <div class="form">
-            <div v-if="!isNew && !sale">
+            <div v-if="!isNew && !purchase">
               <!-- <LoadingSpinner /> -->
             </div>
             <div class="row">
@@ -43,7 +47,7 @@
                     <div class="card h-100">
                       <div class="card-body">
                         <div class="row align-items-center">
-                          <div class="col mr-2 pb-0 mb-0">
+                          <div class="col mr-2">
                             <div
                               class="text-xs font-weight-bold text-center text-uppercase mb-1"
                             >
@@ -63,35 +67,26 @@
                               ৳ {{ book.price }}
                             </div>
                             <div class="py-0 text-muted text-xs text-center">
-                             
                               <span v-for="(author, index) in book.authors" :key="author.id"> <i class="fa fa-pen"></i>
                                 {{ author.author_name }}<span v-if="index < book.authors.length - 1">, </span>
                               </span>
-                            </div>
-                            <div class="text-center">
-                              <small>Available Stock: {{ book.stock_quantity }}</small>
                             </div>
                           </div>
                         </div>
                       </div>
                       <div class="card-footer text-center py-1">
-                        <div v-if="book.stock_quantity >= 1">
-                          <button
-                            @click="addToCart(book)"
-                            :class="`btn btn-sm m-1  my-btn-primary addToCart${book.id}`"
-                          >
-                            <i class="fa fa-plus"></i> Add To Cart
-                          </button>
-                          <button
-                            @click="addToCourtesyCart(book)"
-                            :class="`btn btn-sm m-1  my-btn-danger addToCourtesyCart${book.id}`"
-                          >
-                            <i class="fa fa-plus"></i> সৌজন্য কপি
-                          </button>
-                        </div>
-                        <div v-else="">
-                          <span class="badge badge-danger py-2">Out of stock</span>
-                        </div>
+                        <button
+                          @click="addToCart(book)"
+                          :class="`btn btn-sm m-1  my-btn-primary addToCart${book.id}`"
+                        >
+                          <i class="fa fa-plus"></i> Add To Cart
+                        </button>
+                        <button
+                          @click="addToCourtesyCart(book)"
+                          :class="`btn btn-sm m-1  my-btn-danger addToCourtesyCart${book.id}`"
+                        >
+                          <i class="fa fa-plus"></i> সৌজন্য কপি
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -113,48 +108,46 @@
               </div>
               <div
                 class="col-md-5 py-2"
-                style="border-radius: 5px; border: 2px solid #c9f4aa; "
+                style="border-radius: 5px; border: 2px solid #c9f4aa"
               >
                 <AlertError :form="form" />
                 <form
                   id="form"
-                  class="sale"
+                  class="purchase"
                   enctype="multipart/form-data"
                   @submit.prevent="submitForm"
                   @keydown="form.onKeydown($event)"
                 >
-                  <div class="input-group mb-1 row mx-0 px-0 ">
+                  <div class="input-group mb-2 row mx-0 px-0">
                     <div class="input-group-prepend px-0 col-md-4 mx-0">
                       <label class="input-group-text col-md-12" for="inputGroupSelect01"
-                        >Customer
+                        ><i class="fa fa-user"> Supplier</i> 
                         <div class="text-danger">*</div></label
                       >
                     </div>
                     <select
                       class="custom-select mx-0 pe-0"
-                      v-model="form.customer_id"
-                      @change="getDiscountPercentage()"
-                      :class="{ 'is-invalid': errors.customer_id }"
+                      v-model="form.supplier_id"
+                      :class="{ 'is-invalid': form.errors.has('supplier_id') }"
                     >
                       <option value="" disabled selected>Choose...</option>
                       <option
-                        :value="customer.id"
-                        v-for="customer in customers"
-                        :key="customer.id"
+                        :value="supplier.id"
+                        v-for="supplier in suppliers"
+                        :key="supplier.id"
                       >
-                        {{ customer.customer_name }}
+                        {{ supplier.supplier_name }}
                       </option>
                     </select>
-                    <p v-if="errors.customer_id"  class="error-message text-danger"> {{ errors.customer_id[0] }}</p>
-                    <HasError :form="form" field="customer_id" />
+                    <HasError :form="form" field="supplier_id" />
                   </div>
-                  <div class="input-group mb-1 row mx-0 px-0">
+                  <div class="input-group mb-2 row mx-0 px-0">
                     <div class="input-group-prepend px-0 col-md-4 mx-0">
                       <label
                         class="input-group-text col-md-12"
                         for="inputGroupSelect01"
                         title=""
-                        >Sale Date
+                        >Purchase Date
                         <div class="text-danger">*</div></label
                       >
                     </div>
@@ -163,18 +156,16 @@
                       class="form-control datecalender"
                       id="datecalander"
                       autocomplete="off"
-                      placeholder="Choose sale date"
-                      name="sale_date"
-                      v-model="form.sale_date"
-                      @input="clearError('sale_date')"
-                      :class="{ 'is-invalid': errors.sale_date }"
+                      placeholder="Choose purchase date"
+                      name="purchase_date"
+                      v-model="form.purchase_date"
+                      :class="{ 'is-invalid': form.errors.has('purchase_date') }"
                     />
-                    <p v-if="errors.sale_date"  class="error-message text-danger"> {{ errors.sale_date[0] }}</p>
-                    
+                    <HasError :form="form" field="purchase_date" />
                   </div>
                   <fieldset class="reset my-1 p-1" style="background-color: #c9f4aa">
                     <legend class="text-white my-btn-primary p-1 reset">
-                      বিক্রয় কপি:
+                      ক্রয়কৃত কপি:
                     </legend>
                     <table class="table table-sm">
                       <thead>
@@ -244,6 +235,7 @@
                               style="width: 50px"
                               v-model="vatPercentage"
                               @input="updateVat"
+                              
                             />
                           </td>
                           <td class="text-bold px-1 text-right">
@@ -251,22 +243,6 @@
                           </td>
                           <td class="text-bold px-1"></td>
                         </tr>
-                        <tr>
-                          <td class="text-bold px-1" colspan="2">Shipping Cost</td>
-                          <td class="text-bold px-1">
-                           
-                          </td>
-                          <td class="text-bold px-1 text-right">
-                            <input
-                              type="number"
-                              style="width: 100px"
-                              v-model="form.shipping_amount"
-                              @input="updateShippingCost"
-                            />
-                          </td>
-                          <td class="text-bold px-1"></td>
-                        </tr>
-                        
                         <tr>
                           <td class="fw-bold px-1" colspan="2">NET TOTAL</td>
                           <td class="fw-bold px-1"></td>
@@ -306,7 +282,6 @@
                             <select
                               name="payment_method"
                               v-model="form.payment_method"
-                              @change="clearError('payment_method')"
                               class="form-select"
                               :class="{ 'is-invalid': form.errors.has('payment_method') }"
                             >
@@ -317,18 +292,14 @@
                           </td>
                         </tr>
                         <tr v-show="payAmount > 0">
-                          <td class="fw-bold px-1" colspan="1">
-                            Payment Descriptin
-                            <div class="text-danger">*</div>
-                          </td>
+                          <td class="fw-bold px-1" colspan="1">Payment Descriptin</td>
                           <td class="fw-bold px-1" colspan="4">
                             <input
                               type="text"
                               class="form-control"
                               v-model="form.payment_description"
-                              @input="clearError('payment_description')"
                               :class="{
-                                'is-invalid': errors.payment_description
+                                'is-invalid': form.errors.has('payment_description'),
                               }"
                               placeholder="Enter payment description here"
                             />
@@ -336,28 +307,23 @@
                           </td>
                         </tr>
                         <tr v-show="payAmount > 0">
-                          <td class="fw-bold px-1" colspan="1">
-                            Paid By
-                            <div class="text-danger">*</div>
-                          </td>
+                          <td class="fw-bold px-1" colspan="1">Paid By</td>
                           <td class="fw-bold px-1" colspan="4">
                             <input
                               type="text"
                               class="form-control"
                               v-model="form.paid_by"
-                              @input="clearError('paid_by')"
                               :class="{ 'is-invalid': form.errors.has('paid_by') }"
                               placeholder="Enter paid by"
                             />
                             <HasError :form="form" field="paid_by" />
                           </td>
                         </tr>
-                        
                       </tbody>
                       <tbody v-else>
                         <tr>
                           <td colspan="5" class="py-3 text-center">
-                            <div v-if="!isNew && !sale">
+                            <div v-if="!isNew && !purchase">
                               <LoadingSpinner />
                             </div>
                             Cart Empty <HasError :form="form" field="cart_items" />
@@ -421,7 +387,7 @@
                       <tbody v-else>
                         <tr>
                           <td colspan="5" class="py-3 text-center">
-                            <div v-if="!isNew && !sale">
+                            <div v-if="!isNew && !purchase">
                               <LoadingSpinner />
                             </div>
                             Cart Empty <HasError :form="form" field="cart_items" />
@@ -444,7 +410,6 @@
                       placeholder="Choose..."
                       name="attach_file"
                       @change="onFileChange"
-                      @input="clearError('attach_file')"
                       accept="image/*,application/pdf"
                       :class="{ 'is-invalid': form.errors.has('attach_file') }"
                     />
@@ -479,7 +444,7 @@
                         class="input-group-text col-md-12"
                         for="inputGroupSelect01"
                         title=""
-                        >Shipping Address:
+                        >Purchase Note:
                         <div class="text-danger"></div
                       ></label>
                     </div>
@@ -489,35 +454,17 @@
                       cols="30"
                       rows="2"
                       class="form-control"
-                      v-model="form.shipping_address"
-                      >{{ form.shipping_address }}</textarea
-                    >
-                  </div>
-                  <div class="input-group mb-2 row mx-0 px-0">
-                    <div class="input-group-prepend px-0 col-md-4 mx-0">
-                      <label
-                        class="input-group-text col-md-12"
-                        for="inputGroupSelect01"
-                        title=""
-                        >Sale Note:
-                        <div class="text-danger"></div
-                      ></label>
-                    </div>
-                    <textarea
-                      name=""
-                      id=""
-                      cols="30"
-                      rows="2"
-                      class="form-control"
-                      v-model="form.sale_note"
-                      >{{ form.sale_note }}</textarea
+                      v-model="form.purchase_note"
+                      >{{ form.purchase_note }}</textarea
                     >
                   </div>
                   <div class="form-group mt-2">
                     <!-- <div v-if="form.progress">Progress: {{ form.progress.percentage }}%</div> -->
-                    <router-link to="/sales" class="btn btn-lg btn-primary px-2 mx-1"
-                      ><i class="fa fa-list"></i> Manage Sale</router-link
-                    >
+                    <router-link 
+                          to="/purchases"
+                          class="btn btn-lg btn-primary px-2 mx-1"
+                          ><i class="fa fa-list"></i> Manage Purchase</router-link
+                        >
                     <save-button v-if="isNew" :is-submitting="isSubmitting"></save-button>
                     <save-changes-button
                       v-else
@@ -545,7 +492,7 @@ export default {
       isSubmitting: false,
       isLoading: false,
       imageUrl: null,
-      sale: false,
+      purchase: false,
       cartItems: [],
       courtesyCartItems: [],
       publicPath: window.publicPath,
@@ -560,15 +507,15 @@ export default {
         current_page: "",
         per_page: "",
       },
-      customers: [],
+      suppliers: [],
       payment_methods: [],
       books: {
         type: Object,
         default: null,
       },
       form: new Form({
-        customer_id: "",
-        sale_date: "",
+        supplier_id: "",
+        purchase_date: "",
         // cartItems: [],
         total_amount: 0,
         courtesy_total_amount: 0,
@@ -582,12 +529,9 @@ export default {
         paid_by: "",
         payment_method: "",
         payment_description: "",
-        sale_note: "",
+        purchase_note: "",
         attach_file: null,
-        shipping_amount: 0,
-        shipping_address: "",
       }),
-      errors:[],
       params: {
         paginate: 6,
         id: "",
@@ -631,30 +575,28 @@ export default {
   },
   async created() {
     this.fetchCategories();
-    this.customers = this.$store.getters.getCustomers;
+    this.suppliers = this.$store.getters.getSuppliers;
+    if (this.suppliers.length == 0) {
+      const response = await axios.get("/api/get-suppliers");
+      this.suppliers = response.data;
+    }
     this.payment_methods = this.$store.getters.getPaymentMethods;
     if (this.payment_methods.length == 0) {
       const response = await axios.get("/api/get-payment-methods");
       this.payment_methods = response.data;
     }
-    if (this.customers.length == 0) {
-      const response = await axios.get("/api/get-customers");
-      this.customers = response.data;
-    }
     if (!this.isNew) {
-      const response = await axios.get(`/api/sales/${this.$route.params.id}`);
+      const response = await axios.get(`/api/purchases/${this.$route.params.id}`);
 
-      this.sale = true;
-      this.form.customer_id = response.data.sale.customer_id;
-      this.form.sale_date = response.data.sale.sale_date;
+      this.purchase = true;
+      this.form.supplier_id = response.data.purchase.supplier_id;
+      this.form.purchase_date = response.data.purchase.purchase_date;
 
-      this.form.attach_file = response.data.sale.attach_file;
-      this.cartItems = response.data.sale_regular_details;
-      this.courtesyCartItems = response.data.sale_courtesy_details;
-      this.payAmount = response.data.sale.pay_amount;
-      this.form.pay_amount = response.data.sale.pay_amount;
-      this.discountPercentage = response.data.sale.discount_percentage;
-      this.form.discount_percentage = response.data.sale.discount_percentage;
+      this.form.attach_file = response.data.purchase.attach_file;
+      this.cartItems = response.data.purchase_regular_details;
+      this.courtesyCartItems = response.data.purchase_courtesy_details;
+      this.payAmount = response.data.purchase.pay_amount;
+      this.form.pay_amount = response.data.purchase.pay_amount;
 
       if (response.data.payment_details.length > 0) {
         this.form.payment_method = response.data.payment_details[0].payment_method;
@@ -662,12 +604,12 @@ export default {
         this.form.payment_description =
           response.data.payment_details[0].payment_description;
       }
-      this.form.sale_note = response.data.sale.sale_note;
+      this.form.purchase_note = response.data.purchase.purchase_note;
 
       this.imageUrl =
-        `${window.publicPath}assets/img/sale/` + response.data.sale.attach_file;
+        `${window.publicPath}assets/img/purchase/` + response.data.purchase.attach_file;
 
-      const fileName = response.data.sale.attach_file;
+      const fileName = response.data.purchase.attach_file;
       if (fileName) {
         const parts = fileName.split(".");
         if (parts.length > 1) {
@@ -675,7 +617,7 @@ export default {
           this.fileExtension = parts[parts.length - 1].toLowerCase();
         }
       }
-    } else {
+    }else{     
       this.resetData();
     }
   },
@@ -720,15 +662,6 @@ export default {
         reader.readAsDataURL(selectedFile);
       }
     },
-    async getDiscountPercentage() {
-      this.clearError('customer_id');
-      // this.isLoading = true;
-      const customerId = this.form.customer_id;
-      const response = await axios.get(`/api/get-customer-discount-percentage/${customerId}`);
-      // this.isLoading = false;
-      this.form.discount_percentage = response.data.discount_percentage;
-      this.discountPercentage = response.data.discount_percentage?response.data.discount_percentage:0;
-    },
     removeSingleImage(image, index) {
       this.imageUrl = null;
       this.form.attach_file = null;
@@ -772,28 +705,28 @@ export default {
     addToCart(book) {
       const cartItem = this.cartItems.find((item) => item.id === book.id);
       if (cartItem) {
-        Notification.success(`Item quantity '${cartItem.title}' Qty. has been updated!`);
+        Notification.success(`Item '${cartItem.title}' Qty. has been updated!`);
         cartItem.quantity++; // If the product already exists, increment its quantity
       } else {
-        Notification.success(`Item Added to cart!`);
+        Notification.success(`Item Added!`);
 
         document.querySelector(`.addToCart${book.id}`).innerHTML =
-          '<i class="fa fa-check"></i> Added to Cart';
+          '<i class="fa fa-check"></i> Added';
         book.quantity = 1;
         this.cartItems.push(book);
       }
       // this.calculateTotal();
     },
     addToCourtesyCart(book) {
-      const courtesyCartItem = this.courtesyCartItems.find((item) => item.id === book.id);
-      if (courtesyCartItem) {
-        Notification.success(`Courtesy Item quantity '${courtesyCartItem.title}' Qty. has been updated!`);
-        courtesyCartItem.courtesy_quantity++; // If the product already exists, increment its quantity
+      const cartItem = this.courtesyCartItems.find((item) => item.id === book.id);
+      if (cartItem) {
+        Notification.success(`Item '${cartItem.title}' Qty. has been updated!`);
+        cartItem.quantity++; // If the product already exists, increment its quantity
       } else {
-        Notification.success(`Item Added to courtesy cart!`);
+        Notification.success(`Item Added!`);
 
         document.querySelector(`.addToCourtesyCart${book.id}`).innerHTML =
-          '<i class="fa fa-check"></i> Added to C. Cart';
+          '<i class="fa fa-check"></i> Added';
         book.courtesy_quantity = 1;
         book.unit_price = book.price;
         this.courtesyCartItems.push(book);
@@ -839,17 +772,7 @@ export default {
         this.courtesyCartItems[index].unit_price = 0;
       }
     },
-    async updateQuantity(index) {
-      const bookId = this.cartItems[index].id;
-      const bookTitle = this.cartItems[index].title;
-      const response = await axios.get(`/api/get-stock-quantity/${bookId}`);
-      const stockQuantity = response.data.stock_quantity;
-      if (stockQuantity < this.cartItems[index].quantity) {
-        Notification.error(
-          `Item '${bookTitle}' insufficient stock quantity! available stock:${stockQuantity}`
-        );
-        this.cartItems[index].quantity = stockQuantity;
-      }
+    updateQuantity(index) {
       // Ensure quantity is a positive number
       if (this.cartItems[index].quantity < 1) {
         this.cartItems[index].quantity = 1;
@@ -883,12 +806,6 @@ export default {
         this.payAmount = 0;
       } else if (this.payAmount > netTotal) {
         this.payAmount = netTotal;
-      }
-    },
-    updateShippingCost() {
-      this.calculateNetTotal();
-      if (this.form.shipping_amount < 0) {
-        this.form.shipping_amount = 0;
       }
     },
     calculateDiscountAmount() {
@@ -925,9 +842,9 @@ export default {
       const discountAmount = (totalBeforeDiscount * this.discountPercentage) / 100;
       const totalAfterDiscount = totalBeforeDiscount - discountAmount;
       const vatAmount = (totalAfterDiscount * this.vatPercentage) / 100;
-      const totalWithVATShippingCost = totalAfterDiscount + vatAmount + this.form.shipping_amount;
-      this.form.net_amount = totalWithVATShippingCost;
-      return totalWithVATShippingCost.toFixed(2);
+      const totalWithVAT = totalAfterDiscount + vatAmount;
+      this.form.net_amount = totalWithVAT;
+      return totalWithVAT.toFixed(2);
     },
     dueAmount() {
       const netAmount = this.calculateNetTotal();
@@ -938,6 +855,7 @@ export default {
     },
     async submitForm() {
       this.isSubmitting = true;
+      console.log(this.form);
       // console.log(this.form.cartItems);
       if (this.isNew) {
         try {
@@ -948,18 +866,16 @@ export default {
           };
 
           // Make the POST request with the correct data structure
-          await axios.post("/api/sales", payload);
+          await axios.post("/api/purchases", payload);
 
           // Navigate and notify
-          this.$router.push({ name: "sales" });
-          Notification.success("Created sale successfully!");
+          this.$router.push({ name: "purchases" });
+          Notification.success("Created purchase successfully!");
         } catch (error) {
           // Log error response to debug
           if (error.response && error.response.data) {
-		          this.errors = error.response.data.errors;
-
             console.error("Error:", error.response.data.errors);
-            Notification.error("Failed to create sale. Check your input.");
+            Notification.error("Failed to create purchase. Check your input.");
           } else {
             console.error("Unexpected error:", error);
             Notification.error("An unexpected error occurred.");
@@ -967,10 +883,10 @@ export default {
         } finally {
           this.isSubmitting = false;
         }
-      }  else {
+      } else {
         try {
           await this.form
-            .post(`/api/sales/${this.$route.params.id}`, {
+            .post(`/api/purchases/${this.$route.params.id}`, {
               params: {
                 cart_items: this.cartItems,
                 courtesy_cart_items: this.courtesyCartItems,
@@ -978,8 +894,8 @@ export default {
               },
             })
             .then((response) => {
-              Notification.success("sale info updated");
-              this.$router.push("/sales");
+              Notification.success("purchase info updated");
+              this.$router.push("/purchases");
             })
             .catch((error) => {
               Notification.error(error);
@@ -994,25 +910,14 @@ export default {
       }
     },
     resetData() {
-      this.clearAllErrors();
-    },
-    clearError(fieldName) {
-      if (this.errors && this.errors[fieldName]) {
-        delete this.errors[fieldName];
-      }
-    },
-    clearAllErrors() {
-      this.errors = {}; // Clear all errors
+      this.form.clear();
+      this.form.reset();
     },
   },
 };
 </script>
 
 <style type="text/css" scoped>
-td{
-  padding: 1px;
-  font-size:12px;
-}
 ul {
   list-style-type: none;
   margin: 0;

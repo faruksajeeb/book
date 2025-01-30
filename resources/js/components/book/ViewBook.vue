@@ -85,6 +85,38 @@
                 </table>
               </div>
             </div>
+            <div class="row">
+              <div class="col-md-12">
+                <h4>Variants</h4>
+                <div v-if="record.variants.length > 0">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Variant Attributes</th>
+                        <th>SKU</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="variant in record.variants" :key="variant.id">
+                        <td>
+                          <!-- {{ variant.attribute_options }} -->
+                            <ul>
+                              <li v-for="attribute in variant.attribute_options" :key="attribute.id">
+                                {{ attribute.attribute.name }} : {{ attribute.value }}
+                              </li>
+                            </ul>
+                        </td>
+                        <td>{{ variant.sku }}</td>
+                        <td>{{ variant.price }}</td>
+                        <td>{{ variant.stock_quantity }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div v-else>

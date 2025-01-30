@@ -23,7 +23,7 @@ return new class extends Migration
             $table->double('net_amount',10,2);
             $table->double('pay_amount',10,2);
             $table->double('due_amount',10,2);
-            $table->string('paid_by');
+            $table->string('paid_by')->nullable();
             $table->string('file')->comment('If any invoice want to attached');
             $table->dateTimeTz('created_at', $precision = 0);
             $table->dateTimeTz('updated_at', $precision = 0);
