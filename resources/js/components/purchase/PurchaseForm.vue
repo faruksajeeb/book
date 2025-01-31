@@ -80,7 +80,7 @@
                     <div class="input-group-prepend px-0 col-md-4 mx-0">
                       <label class="input-group-text col-md-12" for="inputGroupSelect01"
                         ><i class="fa fa-user"> Supplier</i> 
-                        <div class="text-danger">*</div></label
+                        <div class="text-danger"> *</div></label
                       >
                     </div>
                     <select
@@ -105,8 +105,8 @@
                         class="input-group-text col-md-12"
                         for="inputGroupSelect01"
                         title=""
-                        >Purchase Date
-                        <div class="text-danger">*</div></label
+                        ><i class="fa fa-calendar" aria-hidden="true"> Purchase Date</i>  
+                        <div class="text-danger"> *</div></label
                       >
                     </div>
                     <input
@@ -131,56 +131,69 @@
                       <thead>
                         <th class="text-left px-1">Book Name</th>
                         <th class="text-left px-1">Variant</th>
-                        <th class="text-right px-1">Unit Price</th>
+                        <th class="text-right px-1">Cost Price</th>
                         <th class="text-center px-1">Qty</th>
-                        <th class="text-right px-1">Sub Total</th>
+                        <th>Discount</th>
+                        <th class="text-right px-1" style="width: 50px">Total</th>
                         <th style="width: 50px"></th>
                       </thead>
                       <tbody v-if="cartItems.length > 0">
                         <tr v-for="(item, index) in cartItems" :key="`${item.id}-${item.variantId}`">
-                          <td class="px-1">{{ item.title }}</td>
+                          <td class="px-1">{{ isNew ? item.title : item.book.title }}</td>
                           <td class="px-1">{{ item.variant ? formatVariantLabel(item.variant) : "No Variant" }}</td>
                           <td class="px-1 text-right">
                             <input
-                              type="number"
+                              type="number" 
                               v-model="item.price"
                               @input="updatePrice(index)"
-                              style="width: 80px"
+                              style="width: 100px"
                             />
                           </td>
                           <td class="px-1">
                             <!-- {{ item.quantity }} -->
                             <input
+                              style="width: 80px"
                               type="number"
                               v-model="item.quantity"
                               @input="updateQuantity(index)"
-                              style="width: 50px"
                             />
                           </td>
+                          <td>
+                          <input
+                            style="width: 80px"
+                            type="number"
+                            v-model="item.discount_amount"
+                            min="0"
+                            value="0"
+                            placeholder="Enter discount"
+                            @input="updateTotal(item)"
+                          />
+                        </td>
                           <td class="text-right px-1">
-                            {{ item.price * item.quantity }}
+                            <!-- {{ item.price * item.quantity }} -->
+                            {{ calculateSubTotal(item) }}
                           </td>
                           <td class="text-center px-1">
-                            <a href="#" @click="removeFromCart(index)"
+                            <a href="#" @click="removeFromCart(index, item.variant)"
                               ><i class="fa fa-trash text-danger"></i
                             ></a>
                           </td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="3">TOTAL</td>
+                          <td class="fw-bold px-1" colspan="4">TOTAL</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">{{ calculateTotal() }}</td>
                           <td class="fw-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="text-bold px-1" colspan="3">
+                          <td class="text-bold px-1" colspan="4">
                             Discount Percentage(%)
                           </td>
                           <td class="text-bold px-1">
                             <input
                               type="number"
-                              style="width: 50px"
-                              v-model="discountPercentage"
+                              style="width: 80px"
+                              v-model="form.discount_percentage"
                               @input="updateDiscount"
                             />
                           </td>
@@ -190,12 +203,12 @@
                           <td class="text-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="text-bold px-1" colspan="3">Vat Rate(%)</td>
+                          <td class="text-bold px-1" colspan="4">Vat Rate(%)</td>
                           <td class="text-bold px-1">
                             <input
                               type="number"
-                              style="width: 50px"
-                              v-model="vatPercentage"
+                              style="width: 80px"
+                              v-model="form.vat_percentage"
                               @input="updateVat"
                               
                             />
@@ -206,7 +219,7 @@
                           <td class="text-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="3">NET TOTAL</td>
+                          <td class="fw-bold px-1" colspan="4">NET TOTAL</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">
                             {{ calculateNetTotal() }}
@@ -215,13 +228,12 @@
                         </tr>
                         <tr>
                           <td class="fw-bold px-1" colspan="3">Pay Amount</td>
-                          <td class="fw-bold px-1"></td>
-                          <td class="fw-bold px-1 text-right">
+                          <td class="fw-bold px-1 text-right" colspan="3">
                             <input
                               type="number"
-                              style="width: 100px"
-                              class="text-right form-control-sm"
-                              v-model="payAmount"
+                              style="width: 180px"
+                              class="text-right "
+                              v-model="form.pay_amount"
                               :class="{ 'is-invalid': form.errors.has('pay_amount') }"
                               @input="updatePayAmount"
                             />
@@ -230,13 +242,13 @@
                           <td class="fw-bold px-1"></td>
                         </tr>
                         <tr>
-                          <td class="fw-bold px-1" colspan="3">Due Amount</td>
+                          <td class="fw-bold px-1" colspan="4">Due Amount</td>
                           <td class="fw-bold px-1"></td>
                           <td class="fw-bold px-1 text-right">{{ dueAmount() }}</td>
                           <td class="fw-bold px-1"></td>
                         </tr>
-                        <tr v-show="payAmount > 0">
-                          <td class="fw-bold px-1" colspan="1">
+                        <tr v-show="form.pay_amount > 0">
+                          <td class="fw-bold px-1" colspan="2">
                             Payment Method
                             <div class="text-danger">*</div>
                           </td>
@@ -253,10 +265,10 @@
                             <HasError :form="form" field="payment_method" />
                           </td>
                         </tr>
-                        <tr v-show="payAmount > 0">
+                        <tr v-show="form.pay_amount > 0">
                           <td class="fw-bold px-1" colspan="1">Payment Descriptin</td>
-                          <td class="fw-bold px-1" colspan="5">
-                            <input
+                          <td class="fw-bold px-1" colspan="6">
+                            <textarea
                               type="text"
                               class="form-control"
                               v-model="form.payment_description"
@@ -268,9 +280,9 @@
                             <HasError :form="form" field="payment_description" />
                           </td>
                         </tr>
-                        <tr v-show="payAmount > 0">
+                        <tr v-show="form.pay_amount > 0">
                           <td class="fw-bold px-1" colspan="1">Paid By</td>
-                          <td class="fw-bold px-1" colspan="5">
+                          <td class="fw-bold px-1" colspan="6">
                             <input
                               type="text"
                               class="form-control"
@@ -336,7 +348,7 @@
                             {{ citem.unit_price * citem.courtesy_quantity }}
                           </td>
                           <td class="text-center px-1">
-                            <a href="#" @click="removeFromCourtesyCart(index)"
+                            <a href="#" @click="removeFromCourtesyCart(index, citem.variant)"
                               ><i class="fa fa-trash text-danger"></i
                             ></a>
                           </td>
@@ -372,7 +384,7 @@
                     </div>
                     <input
                       type="file"
-                      class="form-control col-md-8"
+                      class="form-control form-control-lg col-md-8"
                       placeholder="Choose..."
                       name="attach_file"
                       @change="onFileChange"
@@ -380,7 +392,7 @@
                       :class="{ 'is-invalid': form.errors.has('attach_file') }"
                     />
                     <HasError :form="form" field="attach_file" />
-                    [Allow File type:jpeg,png,jpg,gif,svg,pdf & Max Size:2MB]
+                    <p>[Allow File type:jpeg,png,jpg,gif,svg,pdf & Max Size:2MB]</p>
                   </div>
                   <div class="image-item">
                     <img
@@ -467,9 +479,6 @@ export default {
       imageUrl: null,
       purchase: false,
       publicPath: window.publicPath,
-      discountPercentage: 0, // Initialize with no discount
-      vatPercentage: 0, // Initialize with no discount
-      payAmount: 0,
       fileExtension: null,
       paginator: {
         totalRecords: 0,
@@ -490,9 +499,9 @@ export default {
         // cartItems: [],
         total_amount: 0,
         courtesy_total_amount: 0,
-        discount_percentage: 0,
-        discount_amount: 0,
-        vat_percentage: 0,
+        discount_percentage: "",
+        discount_amount: "",
+        vat_percentage: "",
         vat_amount: 0,
         net_amount: 0,
         pay_amount: 0,
@@ -564,14 +573,18 @@ export default {
       const response = await axios.get(`/api/purchases/${this.$route.params.id}`);
 
       this.purchase = true;
-      this.form.supplier_id = response.data.purchase.supplier_id;
-      this.form.purchase_date = response.data.purchase.purchase_date;
-
-      this.form.attach_file = response.data.purchase.attach_file;
-      this.cartItems = response.data.purchase_regular_details;
-      this.courtesyCartItems = response.data.purchase_courtesy_details;
-      this.payAmount = response.data.purchase.pay_amount;
-      this.form.pay_amount = response.data.purchase.pay_amount;
+      const purchase = response.data.purchase;
+      this.form.supplier_id = purchase.supplier_id;
+      this.form.purchase_date = purchase.purchase_date;
+      this.form.discount_percentage = purchase.discount_percentage;
+      this.form.discount_amount = purchase.discount_amount;
+      this.form.vat_percentage = purchase.vat_percentage;
+      this.form.vat_amount = purchase.vat_amount;
+      this.form.net_amount = purchase.net_amount;
+      this.form.pay_amount = purchase.pay_amount;
+      this.form.due_amount = purchase.due_amount;
+      this.form.purchase_note = purchase.purchase_note;
+      this.form.attach_file = purchase.attach_file;
 
       if (response.data.payment_details.length > 0) {
         this.form.payment_method = response.data.payment_details[0].payment_method;
@@ -579,7 +592,7 @@ export default {
         this.form.payment_description =
           response.data.payment_details[0].payment_description;
       }
-      this.form.purchase_note = response.data.purchase.purchase_note;
+      
 
       this.imageUrl =
         `${window.publicPath}assets/img/purchase/` + response.data.purchase.attach_file;
@@ -592,6 +605,9 @@ export default {
           this.fileExtension = parts[parts.length - 1].toLowerCase();
         }
       }
+
+      this.cartItems = response.data.purchase_regular_details;
+      this.courtesyCartItems = response.data.purchase_courtesy_details;
     }else{     
       this.resetData();
     }
@@ -705,14 +721,16 @@ export default {
     addToPurchaseCart(book, variant = null) {
       const variantId = variant ? variant.id : "no-variant";
       const cartItem = this.cartItems.find(
-        (item) => item.id === book.id && item.variantId === variantId
+        (item) => item.id === book.id && item.variant_id === variantId
       );
       if (cartItem) {
         Notification.success(`Item '${cartItem.title}' Qty. has been updated!`);
         cartItem.quantity++; // If the product already exists, increment its quantity
       } else {
         Notification.success(`Purchase Item Added!`);
-        const newItem = { ...book, quantity: 1, variantId };
+        book.discount_amount = 0; // Initialize discount
+        
+        const newItem = { ...book, quantity: 1, variant_id: variantId };
         if (variant) {
           newItem.variant = variant;
         }
@@ -724,7 +742,7 @@ export default {
       const variantId = variant ? variant.id : "no-variant";
 
       const cartItem = this.courtesyCartItems.find(
-        (item) => item.id === book.id && item.variantId === variantId
+        (item) => item.id === book.id && item.variant_id === variantId
       );
 
       if (cartItem) {
@@ -732,7 +750,8 @@ export default {
         cartItem.courtesy_quantity++;
       } else {
         Notification.success(`Courtesy Item Added!`);
-        const newItem = { ...book, courtesy_quantity: 1, unit_price: book.price, variantId };
+        book.discount_amount = 0; // Initialize discount
+        const newItem = { ...book, courtesy_quantity: 1, unit_price: book.price, variant_id: variantId };
 
         if (variant) {
           newItem.variant = variant;
@@ -741,32 +760,38 @@ export default {
       }
       // this.calculateTotal();
     },
-    removeFromCart(index) {
-      // Find the index of the item in the cart array
-      // const index = this.cartItems.findIndex(item => item.id === itemId);
+    removeFromCart(index, variant,cartType = 'purchase') {
+      if (index === -1 || !this.cartItems[index]) return; // Ensure the item exists
+      
+      const cartItem = this.cartItems[index];
+      
+      const variantId = variant ? variant.id : "no-variant";
+      const bookId = cartItem.id ? cartItem.id : "no-book";  // Safeguard for book
+      const cartKey = `${bookId}-${variantId}-${cartType}`;
+      
+      document.querySelector(`.addToCart${cartKey}`).innerHTML = `<i class="fa fa-check"></i> Add to cart`;
+      
+      // Remove the item from the cart array
+      this.cartItems.splice(index, 1);
 
-      if (index !== -1) {
-        document.querySelector(`.addToCart${this.cartItems[index].id}`).innerHTML =
-          '<i class="fa fa-plus"></i> Add To Cart';
-        // Remove the item from the cart array
-        this.cartItems.splice(index, 1);
-        Notification.success(`Item Removed!`);
-        // this.calculateTotal();
-      }
+      // Update UI (you should consider using Vue's reactivity here instead of direct DOM manipulation)
+      Notification.success("Item Removed!");
     },
-    removeFromCourtesyCart(index) {
-      // Find the index of the item in the cart array
-      // const index = this.cartItems.findIndex(item => item.id === itemId);
 
-      if (index !== -1) {
-        document.querySelector(
-          `.addToCourtesyCart${this.courtesyCartItems[index].id}`
-        ).innerHTML = '<i class="fa fa-plus"></i> সৌজন্য কপি';
-        // Remove the item from the cart array
-        this.courtesyCartItems.splice(index, 1);
-        Notification.success(`Item removed from courtesy cart!`);
-        // this.calculateTotal();
-      }
+    removeFromCourtesyCart(index, variant, cartType = 'courtesy') {
+      if (index === -1 || !this.courtesyCartItems[index]) return; // Ensure the item exists
+      
+      const cartItem = this.courtesyCartItems[index];
+      
+      const variantId = variant ? variant.id : "no-variant";
+      const bookId = cartItem.id ? cartItem.id : "no-book";  // Safeguard for book
+      const cartKey = `${bookId}-${variantId}-${cartType}`;
+   
+      document.querySelector(`.addToCart${cartKey}`).innerHTML = '<i class="fa fa-plus"></i> সৌজন্য কপি';
+      // Remove the item from the cart array
+      this.courtesyCartItems.splice(index, 1);
+      Notification.success(`Item removed from courtesy cart!`);
+      
     },
     updatePrice(index) {
       // Ensure price is a positive number
@@ -786,6 +811,15 @@ export default {
         this.cartItems[index].quantity = 1;
       }
     },
+    calculateSubTotal(item) {
+      let price = item.unit_price || item.price;
+      let quantity = item.courtesy_quantity || item.quantity;
+      let discount_amount = item.discount_amount || 0;
+      return (price * quantity) - discount_amount;
+    },
+    updateTotal(item) {
+      item.total = this.calculateSubTotal(item);
+    },
     updateCourtesyQuantity(index) {
       // Ensure quantity is a positive number
       if (this.courtesyCartItems[index].courtesy_quantity < 1) {
@@ -793,47 +827,36 @@ export default {
       }
     },
     updateDiscount() {
-      // Ensure discountPercentage is within a valid range (e.g., between 0 and 100)
-      if (this.discountPercentage < 0) {
-        this.discountPercentage = 0;
-      } else if (this.discountPercentage > 100) {
-        this.discountPercentage = 100;
-      }
+      this.form.discount_percentage = Math.min(100, Math.max(0, Number(this.form.discount_percentage) || 0));
     },
     updateVat() {
-      // Ensure vatPercentage is within a valid range (e.g., between 0 and 100)
-      if (this.vatPercentage < 0) {
-        this.vatPercentage = 0;
-      } else if (this.vatPercentage > 100) {
-        this.vatPercentage = 100;
-      }
+      this.form.vat_percentage = Math.min(100, Math.max(0, Number(this.form.vat_percentage) || 0));
     },
     updatePayAmount() {
       const netTotal = this.calculateNetTotal();
-      if (this.payAmount < 0) {
-        this.payAmount = 0;
-      } else if (this.payAmount > netTotal) {
-        this.payAmount = netTotal;
-      }
+      this.form.pay_amount = Math.min(netTotal, Math.max(0, Number(this.form.pay_amount) || 0));
     },
     calculateDiscountAmount() {
       const totalBeforeDiscount = this.calculateTotal();
-      const discountAmount = (totalBeforeDiscount * this.discountPercentage) / 100;
-      this.form.discount_percentage = this.discountPercentage;
+      const discountAmount = (totalBeforeDiscount * this.form.discount_percentage) / 100;
       this.form.discount_amount = discountAmount;
-      // const totalAfterDiscount = totalBeforeDiscount - discountAmount;
       return discountAmount.toFixed(2);
     },
     calculateVatAmount() {
       const totalBeforeDiscount = this.calculateTotal();
-      const vatAmount = (totalBeforeDiscount * this.vatPercentage) / 100;
-      this.form.vat_percentage = this.vatPercentage;
-      this.form.vat_amount = vatAmount;
-      return vatAmount.toFixed(2);
+      const vatPercentage = Number(this.form.vat_percentage) || 0;
+      // Ensure vat percentage is within 0-100 range
+      this.form.vat_percentage = Math.min(100, Math.max(0, vatPercentage));
+
+      const vatAmount = (totalBeforeDiscount * this.form.vat_percentage) / 100;
+      this.form.vat_amount = parseFloat(vatAmount.toFixed(2)); // Ensures number format
+
+      return this.form.vat_amount;
     },
     calculateTotal() {
       return this.cartItems.reduce((total, item) => {
-        const res = total + item.price * item.quantity;
+        const discountAmount = Number(item.discount_amount) || 0;
+        const res = total + item.price * item.quantity - discountAmount;
         this.form.total_amount = res;
         return res;
       }, 0);
@@ -847,17 +870,18 @@ export default {
     },
     calculateNetTotal() {
       const totalBeforeDiscount = this.calculateTotal();
-      const discountAmount = (totalBeforeDiscount * this.discountPercentage) / 100;
+      const discountPercentage = Number(this.form.discount_percentage) || 0;
+      const discountAmount = (totalBeforeDiscount * discountPercentage) / 100;
       const totalAfterDiscount = totalBeforeDiscount - discountAmount;
-      const vatAmount = (totalAfterDiscount * this.vatPercentage) / 100;
+      const vatAmount = (totalAfterDiscount * this.form.vat_percentage) / 100;
       const totalWithVAT = totalAfterDiscount + vatAmount;
       this.form.net_amount = totalWithVAT;
       return totalWithVAT.toFixed(2);
     },
     dueAmount() {
       const netAmount = this.calculateNetTotal();
-      const dueAmount = netAmount - this.payAmount;
-      this.form.pay_amount = this.payAmount;
+      const payAmount = Number(this.form.pay_amount) || 0;
+      const dueAmount = netAmount - payAmount;
       this.form.due_amount = dueAmount;
       return dueAmount.toFixed(2);
     },
@@ -868,9 +892,9 @@ export default {
       if (this.isNew) {
         try {
           const payload = {
+            ...this.form, // Spread other form fields
             cart_items: this.cartItems,
             courtesy_cart_items: this.courtesyCartItems,
-            ...this.form, // Spread other form fields
           };
 
           // Make the POST request with the correct data structure

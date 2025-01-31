@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
             $table->foreignId('variant_id')->nullable()->constrained('product_variants')->onDelete('cascade'); 
             $table->integer('quantity');
-            $table->float('unit_price',8,2);
+            $table->float('price',8,2);
             $table->double('sub_total',10,2);
             $table->decimal('discount_percentage',5,2);
             $table->float('discount_amount',8,2);

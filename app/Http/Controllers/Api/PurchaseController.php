@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Lib\Webspice;
 use App\Models\Book;
+use App\Models\ProductVariant;
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\Supplier;
@@ -98,195 +99,186 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
+        //dd($request->all());
         #permission verfy
         $this->webspice->permissionVerify('purchase.create');
-        $validator = $request->validate(
+        $validated = $request->validate(
             [
+                'cart_items' => 'array',
+                'courtesy_cart_items' => 'array',
                 'supplier_id' => 'required',
                 'purchase_date' => 'required',
                 'pay_amount' => 'numeric|min:0', // Ensure pay_amount is a number and greater than or equal to 0
                 // 'payment_method' => 'required_if:pay_amount,0', // payment_method is required if pay_amount is greater than 0
                 'payment_method' => Rule::requiredIf($request->pay_amount > 0), // payment_method is required if pay_amount is greater than 0
-                'payment_description' => Rule::requiredIf($request->pay_amount > 0), // payment_method is required if pay_amount is greater than 0
+                'payment_description' => 'nullable|string', // payment_method is required if pay_amount is greater than 0
                 'paid_by' => Rule::requiredIf($request->pay_amount > 0), // payment_method is required if pay_amount is greater than 0
                 'attach_file' => 'nullable|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048',
-            ],
-            [
-                // 'cart_items.required' => 'The cart must contain at least one item.',
             ]
         );
 
         try {
 
-            if (($request->cart_items == null || count($request->cart_items) == 0) && ($request->courtesy_cart_items == null || count($request->courtesy_cart_items) <= 0)) {
+            // Check if both carts are empty
+            if (
+                empty($request->cart_items) &&
+                empty($request->courtesy_cart_items)
+            ) {
                 return response()->json(
-                    [
-                        'error' => 'The cart/ courtesy cart must contain at least one item.',
-                    ], 401);
+                    ['error' => 'The cart/courtesy cart must contain at least one item.'],
+                    401
+                );
             }
+
             // Begin a database transaction
             \DB::beginTransaction();
-            $input = $request->all();
+            $purchaseData = $request->except(['cart_items', 'courtesy_cart_items']); 
 
+            // Handle file upload
             if ($request->hasFile('attach_file')) {
-                // $image = Image::make($request->file('attach_file'));
-                // $imageName = time() . '-' . $request->file('attach_file')->getClientOriginalName();
-
-                $destinationPath = 'assets/img/purchase/';
-
                 $file = $request->file('attach_file');
                 $filename = time() . '-' . $file->getClientOriginalName();
-                $uploadSuccess = $file->move(public_path($destinationPath), $filename);
-
-                // $uploadSuccess = $image->save($destinationPath . $imageName);
-
-                /**
-                 * Generate Thumbnail Image Upload on Folder Code
-                 */
-                // $destinationPathThumbnail = public_path('assets/img/purchase/thumbnail/');
-                // $image->resize(50, 50);
-                // $image->save($destinationPathThumbnail . $imageName);
-
-                if ($uploadSuccess) {
-                    $input['attach_file'] = $filename;
+                $destinationPath = 'assets/img/purchase/';
+                if ($file->move(public_path($destinationPath), $filename)) {
+                    $purchaseData['attach_file'] = $filename;
                 }
             }
-            $input['created_by'] = $this->webspice->getUserId();
-
-            $inserted = Purchase::create($input);
-            $purchaseId = $inserted->id;
-            if ($purchaseId) {
-                // Update the balance of the corresponding supplier
-                $supplier = Supplier::find($request->supplier_id);
-                if ($supplier) {
-                    // Ensure the balance is not negative
-                    $newBalance = $supplier->balance + $request->due_amount;
-                    if ($newBalance >= 0) {
-                        $supplier->balance = $newBalance;
+            $purchaseData['created_by'] = $this->webspice->getUserId();
+            # INSERT
+            $purchase = Purchase::create($purchaseData);
+            
+            if ($purchase) {
+                // Update supplier balance
+                if ($request->supplier_id) {
+                    $supplier = Supplier::find($request->supplier_id);
+                    if ($supplier) {
+                        // Ensure the balance is not negative
+                        $supplier->balance = max(0, $supplier->balance + $request->due_amount);
                         $supplier->save();
                     }
                 }
+
                 // Insert into supplier payment if pay-amount is grater than 0
                 if ($request->pay_amount > 0) {
                     SupplierPayment::create([
                         'supplier_id' => $request->supplier_id,
-                        'purchase_id' => $purchaseId,
+                        'purchase_id' => $purchase->id,
                         'payment_date' => $request->purchase_date,
                         'payment_amount' => $request->pay_amount,
                         'payment_method' => $request->payment_method,
                         'paid_by' => $request->paid_by,
+                        'file' => '',
                         'payment_description' => $request->payment_description,
-                        // 'file' => ,
                         'transaction_type' => 'invoice_create',
                         'created_by' => $this->webspice->getUserId(),
                     ]);
                 }
+
+                // Process purchase details for both regular and courtesy items
+                $this->processPurchaseDetails($purchase->id, $request->cart_items, 'regular_item');
+                $this->processPurchaseDetails($purchase->id, $request->courtesy_cart_items, 'courtesy_copy');
             }
 
-            // dd($input['cart_items']);
-            # if Cart Items
-            if ($request->cart_items != null && count($request->cart_items) > 0) {
-                foreach ($input['cart_items'] as $item) {
-                    if ($item['quantity'] <= 0) {continue;}
-                    PurchaseDetail::create([
-                        'purchase_id' => $purchaseId,
-                        'book_id' => $item['id'],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['price'],
-                        'sub_total' => $item['quantity'] * $item['price'],
-                        'discount_percentage' => 0,
-                        'discount_amount' => 0,
-                        'vat_percentage' => 0,
-                        'vat_amount' => 0,
-                        'net_sub_total' => $item['quantity'] * $item['price'],
-                        'flag' => 'regular_item',
-                    ]);
-                    // Update the quantity of the corresponding book
-                    $book = Book::find($item['id']);
-
-                    if ($book) {
-                        // Ensure the quantity is not negative
-                        $newQuantity = $book->stock_quantity + $item['quantity'];
-                        if ($newQuantity >= 0) {
-                            $book->stock_quantity = $newQuantity;
-                            $book->save();
-                        } else {
-                            // Handle insufficient quantity error
-                            return response()->json(['error' => 'Insufficient quantity in stock.']);
-                        }
-                    }
-                }
-            }
-            if ($request->courtesy_cart_items != null && count($request->courtesy_cart_items) > 0) {
-                foreach ($input['courtesy_cart_items'] as $item) {
-                    if ($item['courtesy_quantity'] <= 0) {continue;}
-                    PurchaseDetail::create([
-                        'purchase_id' => $purchaseId,
-                        'book_id' => $item['id'],
-                        'quantity' => $item['courtesy_quantity'],
-                        'unit_price' => $item['unit_price'],
-                        'sub_total' => $item['courtesy_quantity'] * $item['unit_price'],
-                        'discount_percentage' => 0,
-                        'discount_amount' => 0,
-                        'vat_percentage' => 0,
-                        'vat_amount' => 0,
-                        'net_sub_total' => $item['courtesy_quantity'] * $item['unit_price'],
-                        'flag' => 'courtesy_copy',
-                    ]);
-                    // Update the quantity of the corresponding book
-                    $book = Book::find($item['id']);
-
-                    if ($book) {
-                        // Ensure the quantity is not negative
-                        $newQuantity = $book->stock_quantity + $item['courtesy_quantity'];
-                        if ($newQuantity >= 0) {
-                            $book->stock_quantity = $newQuantity;
-                            $book->save();
-                        } else {
-                            // Handle insufficient quantity error
-                            return response()->json(['error' => 'Insufficient quantity in stock.']);
-                        }
-                    }
-                }
-            }
             // Commit the database transaction
             \DB::commit();
-
+            return response()->json(['message' => 'Purchase saved successfully!'], 201);
         } catch (Exception $e) {
-            // $this->webspice->message('error', $e->getMessage());
-            // Handle errors
             \DB::rollback();
             return response()->json(
                 [
                     'error' => $e->getMessage(),
                 ], 401);
         }
+    }
 
-        // return redirect()->back();
+    private function processPurchaseDetails($purchaseId, $items, $flag)
+    {
+        if (!$items || count($items) === 0) return;
+
+        $purchaseDetails = [];
+        $stockUpdates = [];
+        foreach ($items as $item) {
+            $quantityField = ($flag === 'courtesy_copy') ? 'courtesy_quantity' : 'quantity';
+            $quantity = $item[$quantityField] ?? 0;
+            if ($quantity <= 0) continue;
+            // Determine whether it's a book or a variant
+            $variantId = ($item['variant_id']!='no-variant') ? $item['variant_id'] : null; // Assuming variant_id exists in request
+            //dd($variantId);
+            $bookId = $item['id'];
+
+            $unitPrice = $item['unit_price'] ?? $item['price'];
+            
+            // Prepare purchase details batch insert
+            $purchaseDetails[] = [
+                'purchase_id' => $purchaseId,
+                'book_id' => $bookId,
+                'variant_id' => $variantId, // Storing variant ID if applicable
+                'quantity' => $quantity,
+                'price' => $unitPrice,
+                'sub_total' => $quantity * $unitPrice,
+                'discount_percentage' => 0,
+                'discount_amount' => $item['discount_amount'] ?? 0,
+                'vat_percentage' => 0,
+                'vat_amount' => 0,
+                'net_sub_total' => $quantity * $unitPrice,
+                'flag' => $flag,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            // Store stock update information
+            $stockKey = $variantId ? "variant_{$variantId}" : "book_{$bookId}";
+            if (!isset($stockUpdates[$stockKey])) {
+                $stockUpdates[$stockKey] = 0;
+            }
+            $stockUpdates[$stockKey] += $quantity;
+        }
+        // Bulk insert purchase details
+        if (!empty($purchaseDetails)) {
+            PurchaseDetail::insert($purchaseDetails);
+        }
+        // Bulk update stock quantities
+        foreach ($stockUpdates as $stockKey => $quantity) {
+            if (strpos($stockKey, 'variant_') === 0) {
+                $variantId = str_replace('variant_', '', $stockKey);
+                ProductVariant::where('id', $variantId)->increment('stock_quantity', $quantity);
+            } else {
+                $bookId = str_replace('book_', '', $stockKey);
+                Book::where('id', $bookId)->increment('stock_quantity', $quantity);
+            }
+        }
     }
 
     public function show($id)
     {
         try {
-            $purchase = Purchase::with('supplier')->find($id);
-            // $purchaseRegularDetails = PurchaseDetail::with(['book'])->where('purchase_id', $id)->where('flag', 'regular_item')->get();
-            $purchaseRegularDetails = PurchaseDetail::leftJoin('books', 'purchase_details.book_id', '=', 'books.id')
-                ->select('books.id', 'books.title', 'purchase_details.unit_price as price', 'purchase_details.quantity', 'purchase_details.sub_total')
-                ->where('purchase_details.purchase_id', $id)->where('purchase_details.flag', 'regular_item')->get();
-            $purchaseCourtesyDetails = PurchaseDetail::leftJoin('books', 'purchase_details.book_id', '=', 'books.id')
-                ->select('books.id', 'books.title', 'purchase_details.unit_price', 'purchase_details.quantity as courtesy_quantity', 'purchase_details.sub_total')->where('purchase_id', $id)->where('flag', 'courtesy_copy')->get();
+            $purchase = Purchase::with('supplier')->findOrFail($id);
+
+            $purchaseRegularDetails = PurchaseDetail::with([
+                'book',
+                'variant.attributeOptions.attribute' // Fetch variant attributes
+            ])
+            ->where('purchase_id', $id)
+            ->where('flag', 'regular_item')
+            ->get();
+
+            $purchaseCourtesyDetails = PurchaseDetail::with([
+                'book',
+                'variant.attributeOptions.attribute'
+            ])
+            ->where('purchase_id', $id)
+            ->where('flag', 'courtesy_copy')
+            ->get();
 
             $paymentInfo = SupplierPayment::where('purchase_id', $id)->get();
-            $data = [
+
+            return response()->json([
                 'purchase' => $purchase,
                 'purchase_regular_details' => $purchaseRegularDetails,
                 'purchase_courtesy_details' => $purchaseCourtesyDetails,
                 'payment_details' => $paymentInfo,
-            ];
-            return $data;
+            ]);
         } catch (Exception $e) {
-            // $this->webspice->message('error', $e->getMessage());
             return response()->json(
                 [
                     'error' => $e->getMessage(),
@@ -296,10 +288,7 @@ class PurchaseController extends Controller
 
     public function update(Request $request, $id)
     {
-
         // dd($request->all());
-        // dd($request->file('attach_file'));
-        // dd($request->isMethod('put'));
         #permission verfy
         $this->webspice->permissionVerify('purchase.edit');
 
@@ -510,7 +499,7 @@ class PurchaseController extends Controller
                         'purchase_id' => $id,
                         'book_id' => $detailData['id'],
                         'quantity' => $detailData['quantity'],
-                        'unit_price' => $detailData['price'],
+                        'price' => $detailData['price'],
                         'sub_total' => $detailData['quantity'] * $detailData['price'],
                         'discount_percentage' => 0,
                         'discount_amount' => 0,

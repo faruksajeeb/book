@@ -206,7 +206,7 @@
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePurchase"
           aria-expanded="true" aria-controls="collapsePurchase">
           <i class="far fa-fw fa-window-maximize"></i>
-          <span>Purchases</span>
+          <span>Purchases & Receivings</span>
         </a>
         <div id="collapsePurchase" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">

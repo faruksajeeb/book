@@ -19,7 +19,7 @@
 
           <div v-if="record.purchase">
             <div class="row">
-              <div class="col-md-5">
+              <div class="col-md-4">
                 <h4>Purchase ID: {{ record.purchase.id }}</h4>
                 <table class="table">
                   <tr>
@@ -61,17 +61,19 @@
                   />
                 </fieldset>
               </div>
-              <div class="col-md-7">
+              <div class="col-md-8">
                 <fieldset class="reset" v-if="record.purchase_regular_details.length > 0">
                   <legend class="reset h5 p-2 bg-success text-white">
-                    Regular Item Details
+                    Purchase Items 
                   </legend>
-                  <table class="table">
+                  <table class="table table-sm">
                     <thead>
                       <th>SL No.</th>
                       <th>Book Name</th>
+                      <th>Variants</th>
                       <th class="text-right">Unit Price</th>
                       <th class="text-center">Quantity</th>
+                      <th class="text-center">Discount</th>
                       <th class="text-right">Sub Total</th>
                     </thead>
                     <tbody>
@@ -80,21 +82,29 @@
                         :key="item.id"
                       >
                         <td>{{ index + 1 }}</td>
-                        <td>{{ item.title }}</td>
-                        <td class="text-right">{{ item.price.toFixed(2) }}</td>
+                        <td>{{ item.book.title }}</td>
+                        <td>
+                          <ul  v-if="item.variant">
+                            <li v-for="option in item.variant.attribute_options" :key="option.id">
+                              <strong>{{ option.attribute.name }}:</strong> {{ option.value }}
+                            </li>
+                          </ul>
+                        </td>
+                        <td class="text-right">{{ item.price }}</td>
                         <td class="text-center">{{ item.quantity }}</td>
-                        <td class="text-right">{{ item.sub_total.toFixed(2) }}</td>
+                        <td class="text-right">{{ item.discount_amount }}</td>
+                        <td class="text-right">{{ item.sub_total }}</td>
                       </tr>
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td class="text-left fw-bold" colspan="4">Total</td>
+                        <td class="text-left fw-bold" colspan="5">Total</td>
                         <td class="text-right fw-bold">
-                          {{ record.purchase.total_amount.toFixed(2) }}
+                          {{ record.purchase.total_amount }}
                         </td>
                       </tr>
                       <tr>
-                        <td class="text-left fw-bold" colspan="3">Discount</td>
+                        <td class="text-left fw-bold" colspan="4">Discount</td>
                         <td class="text-center fw-bold">
                           {{ record.purchase.discount_percentage }}%
                         </td>
@@ -103,7 +113,7 @@
                         </td>
                       </tr>
                       <tr>
-                        <td class="text-left fw-bold" colspan="3">Vat</td>
+                        <td class="text-left fw-bold" colspan="4">Vat</td>
                         <td class="text-center fw-bold">
                           {{ record.purchase.vat_percentage }}%
                         </td>
@@ -112,19 +122,19 @@
                         </td>
                       </tr>
                       <tr>
-                        <td class="text-left fw-bold" colspan="4">Net Amount</td>
+                        <td class="text-left fw-bold" colspan="5">Net Amount</td>
                         <td class="text-right fw-bold">
                           {{ record.purchase.net_amount.toFixed(2) }}
                         </td>
                       </tr>
                       <tr>
-                        <td class="text-left fw-bold" colspan="4">Pay Amount</td>
+                        <td class="text-left fw-bold" colspan="5">Pay Amount</td>
                         <td class="text-right fw-bold">
                           {{ record.purchase.pay_amount.toFixed(2) }}
                         </td>
                       </tr>
                       <tr>
-                        <td class="text-left fw-bold" colspan="4">Due Amount</td>
+                        <td class="text-left fw-bold" colspan="5">Due Amount</td>
                         <td class="text-right fw-bold">
                           {{ record.purchase.due_amount.toFixed(2) }}
                         </td>
@@ -184,27 +194,37 @@
                   class="reset mt-3"
                   v-if="record.purchase_courtesy_details.length > 0"
                 >
-                  <legend class="reset h5 p-2 bg-danger text-white">
-                    Courtesy Item Details (সৌজন্য সংখ্যা)
+                  <legend class="reset h5 p-2 bg-warning text-dark">
+                    Courtesy Items  (সৌজন্য সংখ্যা)
                   </legend>
-                  <table class="table">
+                  <table class="table table-sm">
                     <thead>
                       <th>SL No.</th>
                       <th>Book Name</th>
+                      <th>Variants</th>
                       <th class="text-right">Unit Price</th>
                       <th class="text-center">Quantity</th>
+                      <th class="text-center">Discount</th>
                       <th class="text-right">Sub Total</th>
                     </thead>
                     <tbody>
                       <tr v-for="(item, index) in record.purchase_courtesy_details">
                         <td>{{ index + 1 }}</td>
-                        <td>{{ item.title }}</td>
-                        <td class="text-right">{{ item.unit_price.toFixed(2) }}</td>
+                        <td>{{ item.book.title }}</td>
+                        <td>
+                          <ul  v-if="item.variant">
+                            <li v-for="option in item.variant.attribute_options" :key="option.id">
+                              <strong>{{ option.attribute.name }}:</strong> {{ option.value }}
+                            </li>
+                          </ul>
+                        </td>
+                        <td class="text-right">{{ item.price.toFixed(2) }}</td>
                         <td class="text-center">{{ item.courtesy_quantity }}</td>
+                        <td class="text-right">{{ item.discount_amount.toFixed(2) }}</td>
                         <td class="text-right">{{ item.sub_total.toFixed(2) }}</td>
                       </tr>
                       <tr>
-                        <td class="text-left fw-bold" colspan="4">Total</td>
+                        <td class="text-left fw-bold" colspan="5">Total</td>
                         <td class="text-right fw-bold">
                           {{ record.purchase.courtesy_total_amount }}
                         </td>

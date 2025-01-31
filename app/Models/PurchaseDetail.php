@@ -14,7 +14,7 @@ class PurchaseDetail extends Model
         'purchase_id',
         'book_id',
         'quantity',
-        'unit_price',
+        'price',
         'sub_total',
         'discount_percentage',
         'discount_amount',
@@ -33,10 +33,28 @@ class PurchaseDetail extends Model
     
     public function book() : BelongsTo
     {
-        return $this->belongsTo(Book::class)->withTrashed()->withDefault(['value'=>'']);
+        return $this->belongsTo(Book::class)->withTrashed();
     }
     public function purchase() : BelongsTo
     {
         return $this->belongsTo(Purchase::class)->withTrashed()->withDefault(['value'=>'']);
     }
+    // 📌 Relationship with ProductVariant
+    public function variant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'variant_id');
+    }
+    // 📌 Relationship with Variant Options via ProductVariant
+    public function variantOptions() 
+    {
+        return $this->hasManyThrough(
+            ProductAttributeOption::class,
+            ProductVariantAttributeOption::class,
+            'product_variant_id',
+            'id',
+            'variant_id',
+            'product_attribute_option_id'
+        )->with('attribute'); // Load the related attribute
+    }
+  
 }

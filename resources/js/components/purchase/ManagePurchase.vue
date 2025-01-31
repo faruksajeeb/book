@@ -467,7 +467,7 @@ export default {
         default: null,
       },
       params: {
-        paginate: 5,
+        paginate: 12,
         id: "",
         purchase_date: "",
         supplier_id: "",
