@@ -2,54 +2,163 @@
     <div class="row">
         <div class="col-md-12 offset-md-0">
             <div class="card shadow-sm my-2">
-                <div class="card-header py-2 my-bg-success">
-                    <h3 class="text-white-900" v-if="isNew">
-                        <i class="fa fa-plus"></i> Add Sale
-                    </h3>
-                    <h3 class="text-white-900" v-else>
-                        <i class="fa fa-pencil"></i> Edit Sale
-                    </h3>
-                    <p class="text-white m-0">
-                        ফরমের লাল তারকা (<span class="text-danger">*</span>)
-                        চিহ্নিত ঘরগুলো অবশ্যই পূরণ করুন। অন্যান্য ঘরগুলো পূরণ
-                        ঐচ্ছিক।
-                    </p>
+                <div class="card-header py-0 my-bg-success">
+                    <!-- <h3 class="text-white-900" v-if="isNew"><i class="fa fa-plus"></i> Add Sale</h3>
+          <h3 class="text-white-900" v-else><i class="fa fa-pencil"></i> Edit Sale</h3> -->
+                    <!-- <p class="text-white m-0">
+            ফরমের লাল তারকা (<span class="text-danger">*</span>) চিহ্নিত ঘরগুলো অবশ্যই
+            পূরণ করুন। অন্যান্য ঘরগুলো পূরণ ঐচ্ছিক।
+          </p> -->
                 </div>
                 <div class="card-body p-3">
                     <div class="form">
-                        <div v-if="!isNew && !purchase">
+                        <div v-if="!isNew && !sale">
                             <!-- <LoadingSpinner /> -->
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-7">
                                 <input
                                     type="text"
-                                    class="form-control form-control-lg full-width"
+                                    class="form-control"
                                     placeholder="Search by publication, author, book name, isbn or genre..."
                                     v-model="search"
                                 />
                                 <div class="categories my-2">
                                     <a
                                         href="#"
-                                        class="p-2 m-1 my-text-primary text-nowrap"
+                                        class="p-2 m-1 text-danger text-nowrap"
                                         @click="getCatWiseBook('')"
                                         >All Category</a
                                     >
                                     <a
                                         href="#"
-                                        class="p-2 m-1 my-text-primary text-nowrap"
+                                        class="p-2 m-1 text-danger text-nowrap"
                                         @click="getCatWiseBook(category.id)"
                                         v-for="category in categories"
                                         >{{ category.category_name }}</a
                                     >
                                 </div>
-                                <SearchResult
-                                    v-if="searchResults.length"
-                                    :searchResults="searchResults"
-                                    @add-to-cart="handleAddToCart"
-                                    :cartStatus="cartStatus"
-                                />
-
+                                <div
+                                    class="row product-view"
+                                    v-if="books && paginator.totalRecords > 0"
+                                >
+                                    <div
+                                        class="col-xl-4 col-md-6 mb-2 px-1"
+                                        v-for="book in books.data"
+                                    >
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div
+                                                    class="row align-items-center"
+                                                >
+                                                    <div
+                                                        class="col mr-2 pb-0 mb-0"
+                                                    >
+                                                        <div
+                                                            class="text-xs font-weight-bold text-center text-uppercase mb-1"
+                                                        >
+                                                            {{ book.title }}
+                                                        </div>
+                                                        <div
+                                                            class="text-center"
+                                                        >
+                                                            <img
+                                                                class="text-center"
+                                                                :src="
+                                                                    `${publicPath}assets/img/book/thumbnail/` +
+                                                                    book.photo
+                                                                "
+                                                                alt=""
+                                                                width="100"
+                                                            />
+                                                        </div>
+                                                        <div
+                                                            class="text-center font-weight-bold text-gray-800"
+                                                        >
+                                                            ৳ {{ book.price }}
+                                                        </div>
+                                                        <div
+                                                            class="py-0 text-muted text-xs text-center"
+                                                        >
+                                                            <span
+                                                                v-for="(
+                                                                    author,
+                                                                    index
+                                                                ) in book.authors"
+                                                                :key="author.id"
+                                                            >
+                                                                <i
+                                                                    class="fa fa-pen"
+                                                                ></i>
+                                                                {{
+                                                                    author.author_name
+                                                                }}<span
+                                                                    v-if="
+                                                                        index <
+                                                                        book
+                                                                            .authors
+                                                                            .length -
+                                                                            1
+                                                                    "
+                                                                    >,
+                                                                </span>
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            class="text-center"
+                                                        >
+                                                            <small
+                                                                >Available
+                                                                Stock:
+                                                                {{
+                                                                    book.stock_quantity
+                                                                }}</small
+                                                            >
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="card-footer text-center py-1"
+                                            >
+                                                <div
+                                                    v-if="
+                                                        book.stock_quantity >= 1
+                                                    "
+                                                >
+                                                    <button
+                                                        @click="addToCart(book)"
+                                                        :class="`btn btn-sm m-1  my-btn-primary addToCart${book.id}`"
+                                                    >
+                                                        <i
+                                                            class="fa fa-plus"
+                                                        ></i>
+                                                        Add To Cart
+                                                    </button>
+                                                    <button
+                                                        @click="
+                                                            addToCourtesyCart(
+                                                                book
+                                                            )
+                                                        "
+                                                        :class="`btn btn-sm m-1  my-btn-danger addToCourtesyCart${book.id}`"
+                                                    >
+                                                        <i
+                                                            class="fa fa-plus"
+                                                        ></i>
+                                                        সৌজন্য কপি
+                                                    </button>
+                                                </div>
+                                                <div v-else="">
+                                                    <span
+                                                        class="badge badge-danger py-2"
+                                                        >Out of stock</span
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div v-else class="text-center loading-section">
                                     <loader v-if="isLoading"></loader>
                                     <NoRecordFound v-else />
@@ -66,7 +175,7 @@
                                 </div>
                             </div>
                             <div
-                                class="col-md-6 py-2"
+                                class="col-md-5 py-2"
                                 style="
                                     border-radius: 5px;
                                     border: 2px solid #c9f4aa;
@@ -80,16 +189,14 @@
                                     @submit.prevent="submitForm"
                                     @keydown="form.onKeydown($event)"
                                 >
-                                    <div class="input-group mb-2 row mx-0 px-0">
+                                    <div class="input-group mb-1 row mx-0 px-0">
                                         <div
                                             class="input-group-prepend px-0 col-md-4 mx-0"
                                         >
                                             <label
                                                 class="input-group-text col-md-12"
                                                 for="inputGroupSelect01"
-                                                ><i class="fa fa-user">
-                                                    Customer</i
-                                                >
+                                                >Customer
                                                 <div class="text-danger">
                                                     *
                                                 </div></label
@@ -98,11 +205,10 @@
                                         <select
                                             class="custom-select mx-0 pe-0"
                                             v-model="form.customer_id"
+                                            @change="getDiscountPercentage()"
                                             :class="{
                                                 'is-invalid':
-                                                    form.errors.has(
-                                                        'customer_id'
-                                                    ),
+                                                    errors.customer_id,
                                             }"
                                         >
                                             <option value="" disabled selected>
@@ -116,12 +222,18 @@
                                                 {{ customer.customer_name }}
                                             </option>
                                         </select>
+                                        <p
+                                            v-if="errors.customer_id"
+                                            class="error-message text-danger"
+                                        >
+                                            {{ errors.customer_id[0] }}
+                                        </p>
                                         <HasError
                                             :form="form"
                                             field="customer_id"
                                         />
                                     </div>
-                                    <div class="input-group mb-2 row mx-0 px-0">
+                                    <div class="input-group mb-1 row mx-0 px-0">
                                         <div
                                             class="input-group-prepend px-0 col-md-4 mx-0"
                                         >
@@ -129,12 +241,7 @@
                                                 class="input-group-text col-md-12"
                                                 for="inputGroupSelect01"
                                                 title=""
-                                                ><i
-                                                    class="fa fa-calendar"
-                                                    aria-hidden="true"
-                                                >
-                                                    Sale Date</i
-                                                >
+                                                >Sale Date
                                                 <div class="text-danger">
                                                     *
                                                 </div></label
@@ -148,20 +255,18 @@
                                             placeholder="Choose sale date"
                                             name="sale_date"
                                             v-model="form.sale_date"
+                                            @input="clearError('sale_date')"
                                             :class="{
-                                                'is-invalid':
-                                                    form.errors.has(
-                                                        'sale_date'
-                                                    ),
+                                                'is-invalid': errors.sale_date,
                                             }"
                                         />
-                                        <HasError
-                                            :form="form"
-                                            field="sale_date"
-                                        />
+                                        <p
+                                            v-if="errors.sale_date"
+                                            class="error-message text-danger"
+                                        >
+                                            {{ errors.sale_date[0] }}
+                                        </p>
                                     </div>
-
-                                    <!-- <SaleCart :items="saleCartItems" /> -->
                                     <fieldset
                                         class="reset my-1 p-1"
                                         style="background-color: #c9f4aa"
@@ -176,21 +281,14 @@
                                                 <th class="text-left px-1">
                                                     Book Name
                                                 </th>
-                                                <th class="text-left px-1">
-                                                    Variant
-                                                </th>
                                                 <th class="text-right px-1">
-                                                    Cost Price
+                                                    Unit Price
                                                 </th>
                                                 <th class="text-center px-1">
                                                     Qty
                                                 </th>
-                                                <th>Discount</th>
-                                                <th
-                                                    class="text-right px-1"
-                                                    style="width: 50px"
-                                                >
-                                                    Total
+                                                <th class="text-right px-1">
+                                                    Sub Total
                                                 </th>
                                                 <th style="width: 50px"></th>
                                             </thead>
@@ -199,24 +297,10 @@
                                                     v-for="(
                                                         item, index
                                                     ) in cartItems"
-                                                    :key="`${item.id}-${item.variantId}`"
+                                                    :key="index"
                                                 >
                                                     <td class="px-1">
-                                                        {{
-                                                            isNew
-                                                                ? item.title
-                                                                : item.book
-                                                                      .title
-                                                        }}
-                                                    </td>
-                                                    <td class="px-1">
-                                                        {{
-                                                            item.variant
-                                                                ? formatVariantLabel(
-                                                                      item.variant
-                                                                  )
-                                                                : "No Variant"
-                                                        }}
+                                                        {{ item.title }}
                                                     </td>
                                                     <td class="px-1 text-right">
                                                         <input
@@ -227,13 +311,12 @@
                                                                     index
                                                                 )
                                                             "
-                                                            style="width: 100px"
+                                                            style="width: 80px"
                                                         />
                                                     </td>
                                                     <td class="px-1">
                                                         <!-- {{ item.quantity }} -->
                                                         <input
-                                                            style="width: 80px"
                                                             type="number"
                                                             v-model="
                                                                 item.quantity
@@ -243,31 +326,13 @@
                                                                     index
                                                                 )
                                                             "
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <input
-                                                            style="width: 80px"
-                                                            type="number"
-                                                            v-model="
-                                                                item.discount_amount
-                                                            "
-                                                            min="0"
-                                                            value="0"
-                                                            placeholder="Enter discount"
-                                                            @input="
-                                                                updateTotal(
-                                                                    item
-                                                                )
-                                                            "
+                                                            style="width: 50px"
                                                         />
                                                     </td>
                                                     <td class="text-right px-1">
-                                                        <!-- {{ item.price * item.quantity }} -->
                                                         {{
-                                                            calculateSubTotal(
-                                                                item
-                                                            )
+                                                            item.price *
+                                                            item.quantity
                                                         }}
                                                     </td>
                                                     <td
@@ -277,8 +342,7 @@
                                                             href="#"
                                                             @click="
                                                                 removeFromCart(
-                                                                    index,
-                                                                    item.variant
+                                                                    index
                                                                 )
                                                             "
                                                             ><i
@@ -290,7 +354,7 @@
                                                 <tr>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="4"
+                                                        colspan="2"
                                                     >
                                                         TOTAL
                                                     </td>
@@ -309,16 +373,16 @@
                                                 <tr>
                                                     <td
                                                         class="text-bold px-1"
-                                                        colspan="4"
+                                                        colspan="2"
                                                     >
                                                         Discount Percentage(%)
                                                     </td>
                                                     <td class="text-bold px-1">
                                                         <input
                                                             type="number"
-                                                            style="width: 80px"
+                                                            style="width: 50px"
                                                             v-model="
-                                                                form.discount_percentage
+                                                                discountPercentage
                                                             "
                                                             @input="
                                                                 updateDiscount
@@ -339,16 +403,16 @@
                                                 <tr>
                                                     <td
                                                         class="text-bold px-1"
-                                                        colspan="4"
+                                                        colspan="2"
                                                     >
                                                         Vat Rate(%)
                                                     </td>
                                                     <td class="text-bold px-1">
                                                         <input
                                                             type="number"
-                                                            style="width: 80px"
+                                                            style="width: 50px"
                                                             v-model="
-                                                                form.vat_percentage
+                                                                vatPercentage
                                                             "
                                                             @input="updateVat"
                                                         />
@@ -366,8 +430,37 @@
                                                 </tr>
                                                 <tr>
                                                     <td
+                                                        class="text-bold px-1"
+                                                        colspan="2"
+                                                    >
+                                                        Shipping Cost
+                                                    </td>
+                                                    <td
+                                                        class="text-bold px-1"
+                                                    ></td>
+                                                    <td
+                                                        class="text-bold px-1 text-right"
+                                                    >
+                                                        <input
+                                                            type="number"
+                                                            style="width: 100px"
+                                                            v-model="
+                                                                form.shipping_amount
+                                                            "
+                                                            @input="
+                                                                updateShippingCost
+                                                            "
+                                                        />
+                                                    </td>
+                                                    <td
+                                                        class="text-bold px-1"
+                                                    ></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td
                                                         class="fw-bold px-1"
-                                                        colspan="4"
+                                                        colspan="2"
                                                     >
                                                         NET TOTAL
                                                     </td>
@@ -388,21 +481,21 @@
                                                 <tr>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="3"
+                                                        colspan="2"
                                                     >
                                                         Pay Amount
                                                     </td>
                                                     <td
+                                                        class="fw-bold px-1"
+                                                    ></td>
+                                                    <td
                                                         class="fw-bold px-1 text-right"
-                                                        colspan="3"
                                                     >
                                                         <input
                                                             type="number"
-                                                            style="width: 180px"
-                                                            class="text-right"
-                                                            v-model="
-                                                                form.pay_amount
-                                                            "
+                                                            style="width: 100px"
+                                                            class="text-right form-control-sm"
+                                                            v-model="payAmount"
                                                             :class="{
                                                                 'is-invalid':
                                                                     form.errors.has(
@@ -425,7 +518,7 @@
                                                 <tr>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="4"
+                                                        colspan="2"
                                                     >
                                                         Due Amount
                                                     </td>
@@ -441,12 +534,10 @@
                                                         class="fw-bold px-1"
                                                     ></td>
                                                 </tr>
-                                                <tr
-                                                    v-show="form.pay_amount > 0"
-                                                >
+                                                <tr v-show="payAmount > 0">
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="2"
+                                                        colspan="1"
                                                     >
                                                         Payment Method
                                                         <div
@@ -457,12 +548,17 @@
                                                     </td>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="5"
+                                                        colspan="4"
                                                     >
                                                         <select
                                                             name="payment_method"
                                                             v-model="
                                                                 form.payment_method
+                                                            "
+                                                            @change="
+                                                                clearError(
+                                                                    'payment_method'
+                                                                )
                                                             "
                                                             class="form-select"
                                                             :class="{
@@ -496,30 +592,36 @@
                                                         />
                                                     </td>
                                                 </tr>
-                                                <tr
-                                                    v-show="form.pay_amount > 0"
-                                                >
+                                                <tr v-show="payAmount > 0">
                                                     <td
                                                         class="fw-bold px-1"
                                                         colspan="1"
                                                     >
                                                         Payment Descriptin
+                                                        <div
+                                                            class="text-danger"
+                                                        >
+                                                            *
+                                                        </div>
                                                     </td>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="6"
+                                                        colspan="4"
                                                     >
-                                                        <textarea
+                                                        <input
                                                             type="text"
                                                             class="form-control"
                                                             v-model="
                                                                 form.payment_description
                                                             "
+                                                            @input="
+                                                                clearError(
+                                                                    'payment_description'
+                                                                )
+                                                            "
                                                             :class="{
                                                                 'is-invalid':
-                                                                    form.errors.has(
-                                                                        'payment_description'
-                                                                    ),
+                                                                    errors.payment_description,
                                                             }"
                                                             placeholder="Enter payment description here"
                                                         />
@@ -529,24 +631,32 @@
                                                         />
                                                     </td>
                                                 </tr>
-                                                <tr
-                                                    v-show="form.pay_amount > 0"
-                                                >
+                                                <tr v-show="payAmount > 0">
                                                     <td
                                                         class="fw-bold px-1"
                                                         colspan="1"
                                                     >
                                                         Paid By
+                                                        <div
+                                                            class="text-danger"
+                                                        >
+                                                            *
+                                                        </div>
                                                     </td>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="6"
+                                                        colspan="4"
                                                     >
                                                         <input
                                                             type="text"
                                                             class="form-control"
                                                             v-model="
                                                                 form.paid_by
+                                                            "
+                                                            @input="
+                                                                clearError(
+                                                                    'paid_by'
+                                                                )
                                                             "
                                                             :class="{
                                                                 'is-invalid':
@@ -566,13 +676,12 @@
                                             <tbody v-else>
                                                 <tr>
                                                     <td
-                                                        colspan="6"
+                                                        colspan="5"
                                                         class="py-3 text-center"
                                                     >
                                                         <div
                                                             v-if="
-                                                                !isNew &&
-                                                                !purchase
+                                                                !isNew && !sale
                                                             "
                                                         >
                                                             <LoadingSpinner />
@@ -603,9 +712,6 @@
                                                 <th class="text-left px-1">
                                                     Book Name
                                                 </th>
-                                                <th class="text-left px-1">
-                                                    Variant
-                                                </th>
                                                 <th class="text-right px-1">
                                                     Unit Price
                                                 </th>
@@ -626,21 +732,11 @@
                                                     v-for="(
                                                         citem, index
                                                     ) in courtesyCartItems"
-                                                    :key="`${citem.id}-${citem.variantId}`"
+                                                    :key="index"
                                                 >
                                                     <td class="px-1">
                                                         {{ citem.title }}
                                                     </td>
-                                                    <td class="px-1">
-                                                        {{
-                                                            citem.variant
-                                                                ? formatVariantLabel(
-                                                                      citem.variant
-                                                                  )
-                                                                : "No Variant"
-                                                        }}
-                                                    </td>
-
                                                     <td class="px-1 text-right">
                                                         <input
                                                             type="number"
@@ -683,8 +779,7 @@
                                                             href="#"
                                                             @click="
                                                                 removeFromCourtesyCart(
-                                                                    index,
-                                                                    citem.variant
+                                                                    index
                                                                 )
                                                             "
                                                             ><i
@@ -696,7 +791,7 @@
                                                 <tr>
                                                     <td
                                                         class="fw-bold px-1"
-                                                        colspan="3"
+                                                        colspan="2"
                                                     >
                                                         TOTAL
                                                     </td>
@@ -718,13 +813,12 @@
                                             <tbody v-else>
                                                 <tr>
                                                     <td
-                                                        colspan="6"
+                                                        colspan="5"
                                                         class="py-3 text-center"
                                                     >
                                                         <div
                                                             v-if="
-                                                                !isNew &&
-                                                                !purchase
+                                                                !isNew && !sale
                                                             "
                                                         >
                                                             <LoadingSpinner />
@@ -753,10 +847,11 @@
                                         </div>
                                         <input
                                             type="file"
-                                            class="form-control form-control-lg col-md-8"
+                                            class="form-control col-md-8"
                                             placeholder="Choose..."
                                             name="attach_file"
                                             @change="onFileChange"
+                                            @input="clearError('attach_file')"
                                             accept="image/*,application/pdf"
                                             :class="{
                                                 'is-invalid':
@@ -769,11 +864,9 @@
                                             :form="form"
                                             field="attach_file"
                                         />
-                                        <p>
-                                            [Allow File
-                                            type:jpeg,png,jpg,gif,svg,pdf & Max
-                                            Size:2MB]
-                                        </p>
+                                        [Allow File
+                                        type:jpeg,png,jpg,gif,svg,pdf & Max
+                                        Size:2MB]
                                     </div>
                                     <div class="image-item">
                                         <img
@@ -812,6 +905,30 @@
                                                 class="input-group-text col-md-12"
                                                 for="inputGroupSelect01"
                                                 title=""
+                                                >Shipping Address:
+                                                <div class="text-danger"></div
+                                            ></label>
+                                        </div>
+                                        <textarea
+                                            name=""
+                                            id=""
+                                            cols="30"
+                                            rows="2"
+                                            class="form-control"
+                                            v-model="form.shipping_address"
+                                            >{{
+                                                form.shipping_address
+                                            }}</textarea
+                                        >
+                                    </div>
+                                    <div class="input-group mb-2 row mx-0 px-0">
+                                        <div
+                                            class="input-group-prepend px-0 col-md-4 mx-0"
+                                        >
+                                            <label
+                                                class="input-group-text col-md-12"
+                                                for="inputGroupSelect01"
+                                                title=""
                                                 >Sale Note:
                                                 <div class="text-danger"></div
                                             ></label>
@@ -832,7 +949,7 @@
                                             to="/sales"
                                             class="btn btn-lg btn-primary px-2 mx-1"
                                             ><i class="fa fa-list"></i> Manage
-                                            Sales</router-link
+                                            Sale</router-link
                                         >
                                         <save-button
                                             v-if="isNew"
@@ -856,23 +973,21 @@
 <script type="text/javascript">
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
-import { reactive } from "vue";
-import SearchResult from "./SearchResult.vue";
 
 import { mapActions } from "vuex";
 export default {
-    components: { SearchResult },
-    setup() {
-        const cartStatus = reactive({}); // Vue 3 reactive object
-        return { cartStatus };
-    },
     data() {
         return {
             isSubmitting: false,
             isLoading: false,
             imageUrl: null,
             sale: false,
+            cartItems: [],
+            courtesyCartItems: [],
             publicPath: window.publicPath,
+            discountPercentage: 0, // Initialize with no discount
+            vatPercentage: 0, // Initialize with no discount
+            payAmount: 0,
             fileExtension: null,
             paginator: {
                 totalRecords: 0,
@@ -893,9 +1008,9 @@ export default {
                 // cartItems: [],
                 total_amount: 0,
                 courtesy_total_amount: 0,
-                discount_percentage: "",
-                discount_amount: "",
-                vat_percentage: "",
+                discount_percentage: 0,
+                discount_amount: 0,
+                vat_percentage: 0,
                 vat_amount: 0,
                 net_amount: 0,
                 pay_amount: 0,
@@ -905,9 +1020,12 @@ export default {
                 payment_description: "",
                 sale_note: "",
                 attach_file: null,
+                shipping_amount: 0,
+                shipping_address: "",
             }),
+            errors: [],
             params: {
-                paginate: 5,
+                paginate: 6,
                 id: "",
                 title: "",
                 category_id: "",
@@ -915,10 +1033,6 @@ export default {
                 sort_direction: "desc",
             },
             search: "",
-            searchResults: [],
-            selectedVariants: {},
-            cartItems: [],
-            courtesyCartItems: [],
         };
     },
     watch: {
@@ -929,7 +1043,7 @@ export default {
             deep: true,
         },
         search(val, old) {
-            if (val.length >= 2 || old.length >= 2) {
+            if (val.length >= 3 || old.length >= 3) {
                 this.getBooks();
             }
         },
@@ -953,34 +1067,33 @@ export default {
     },
     async created() {
         this.fetchCategories();
-        this.customers = this.$store.getters.getcustomers;
-        if (this.customers.length == 0) {
-            const response = await axios.get("/api/get-customers");
-            this.customers = response.data;
-        }
+        this.customers = this.$store.getters.getCustomers;
         this.payment_methods = this.$store.getters.getPaymentMethods;
         if (this.payment_methods.length == 0) {
             const response = await axios.get("/api/get-payment-methods");
             this.payment_methods = response.data;
         }
+        if (this.customers.length == 0) {
+            const response = await axios.get("/api/get-customers");
+            this.customers = response.data;
+        }
         if (!this.isNew) {
             const response = await axios.get(
-                `/api/purchases/${this.$route.params.id}`
+                `/api/sales/${this.$route.params.id}`
             );
 
-            this.purchase = true;
-            const purchase = response.data.purchase;
-            this.form.customer_id = sale.customer_id;
-            this.form.sale_date = sale.sale_date;
-            this.form.discount_percentage = sale.discount_percentage;
-            this.form.discount_amount = sale.discount_amount;
-            this.form.vat_percentage = sale.vat_percentage;
-            this.form.vat_amount = sale.vat_amount;
-            this.form.net_amount = sale.net_amount;
-            this.form.pay_amount = sale.pay_amount;
-            this.form.due_amount = sale.due_amount;
-            this.form.sale_note = sale.sale_note;
-            this.form.attach_file = sale.attach_file;
+            this.sale = true;
+            this.form.customer_id = response.data.sale.customer_id;
+            this.form.sale_date = response.data.sale.sale_date;
+
+            this.form.attach_file = response.data.sale.attach_file;
+            this.cartItems = response.data.sale_regular_details;
+            this.courtesyCartItems = response.data.sale_courtesy_details;
+            this.payAmount = response.data.sale.pay_amount;
+            this.form.pay_amount = response.data.sale.pay_amount;
+            this.discountPercentage = response.data.sale.discount_percentage;
+            this.form.discount_percentage =
+                response.data.sale.discount_percentage;
 
             if (response.data.payment_details.length > 0) {
                 this.form.payment_method =
@@ -989,9 +1102,10 @@ export default {
                 this.form.payment_description =
                     response.data.payment_details[0].payment_description;
             }
+            this.form.sale_note = response.data.sale.sale_note;
 
             this.imageUrl =
-                `${window.publicPath}assets/img/purchase/` +
+                `${window.publicPath}assets/img/sale/` +
                 response.data.sale.attach_file;
 
             const fileName = response.data.sale.attach_file;
@@ -1002,9 +1116,6 @@ export default {
                     this.fileExtension = parts[parts.length - 1].toLowerCase();
                 }
             }
-
-            this.cartItems = response.data.purchase_regular_details;
-            this.courtesyCartItems = response.data.purchase_courtesy_details;
         } else {
             this.resetData();
         }
@@ -1055,34 +1166,41 @@ export default {
                 reader.readAsDataURL(selectedFile);
             }
         },
+        async getDiscountPercentage() {
+            this.clearError("customer_id");
+            // this.isLoading = true;
+            const customerId = this.form.customer_id;
+            const response = await axios.get(
+                `/api/get-customer-discount-percentage/${customerId}`
+            );
+            // this.isLoading = false;
+            this.form.discount_percentage = response.data.discount_percentage;
+            this.discountPercentage = response.data.discount_percentage
+                ? response.data.discount_percentage
+                : 0;
+        },
         removeSingleImage(image, index) {
             this.imageUrl = null;
             this.form.attach_file = null;
         },
         async getBooks(page = 1) {
-            // if (this.search.length > 2) {
-            //     const response = await axios.get(`/api/books/search`, {
-            //     params: { query: this.searchQuery },
-            //     });
-            //     this.searchResults = response.data;
-            // } else {
-            //     this.searchResults = [];
-            // }
             this.isLoading = true;
             await axios
                 .get("/api/books", {
                     params: {
                         page,
-                        search: this.search.length >= 2 ? this.search : "",
+                        search: this.search.length >= 3 ? this.search : "",
                         ...this.params,
                     },
                 })
                 .then((response) => {
-                    this.searchResults = response.data.data;
+                    // console.log(response);
                     this.isLoading = false;
                     this.books = response.data;
                     this.paginator.totalRecords = response.data.total;
-
+                    // if (response.data.total <= 0) {
+                    //   document.querySelector(".loading-section").innerText = "No Record Found!.";
+                    // }
                     this.paginator.from = response.data.from;
                     this.paginator.to = response.data.to;
                     this.paginator.current_page = response.data.current_page;
@@ -1098,117 +1216,74 @@ export default {
                     this.isLoading = false;
                 });
         },
-        formatVariantLabel(variant) {
-            if (!variant || !variant.attribute_options) return "No attributes";
-            return variant.attribute_options
-                .map((opt) => `${opt.attribute.name}: ${opt.value}`)
-                .join(", ");
-        },
         getCatWiseBook(categoryId) {
             this.params.category_id = categoryId;
         },
-        handleAddToCart({ book, variant, cartType }) {
-            const cartLabel = cartType === "purchase" ? "cart" : "courtesy";
-            const variantId = variant ? variant.id : "no-variant";
-            const cartKey = `${book.id}-${variantId}-${cartType}`;
-            //alert(cartKey);
-            document.querySelector(
-                `.addToCart${cartKey}`
-            ).innerHTML = `<i class="fa fa-check"></i> Added to ${cartLabel}`;
-
-            if (cartType === "purchase") {
-                // this.directPurchaseCart.push(item);
-                this.addToPurchaseCart(book, variant);
-            } else if (cartType === "courtesy") {
-                this.addToCourtesyCart(book, variant);
-                // this.courtesyCart.push(item);
-            }
-        },
-        addToPurchaseCart(book, variant = null) {
-            const variantId = variant ? variant.id : "no-variant";
-            const cartItem = this.cartItems.find(
-                (item) => item.id === book.id && item.variant_id === variantId
-            );
+        addToCart(book) {
+            const cartItem = this.cartItems.find((item) => item.id === book.id);
             if (cartItem) {
                 Notification.success(
-                    `Item '${cartItem.title}' Qty. has been updated!`
+                    `Item quantity '${cartItem.title}' Qty. has been updated!`
                 );
                 cartItem.quantity++; // If the product already exists, increment its quantity
             } else {
-                Notification.success(`Sales Item Added!`);
-                book.discount_amount = 0; // Initialize discount
+                Notification.success(`Item Added to cart!`);
 
-                const newItem = { ...book, quantity: 1, variant_id: variantId };
-                if (variant) {
-                    newItem.variant = variant;
-                }
-                this.cartItems.push(newItem);
+                document.querySelector(`.addToCart${book.id}`).innerHTML =
+                    '<i class="fa fa-check"></i> Added to Cart';
+                book.quantity = 1;
+                this.cartItems.push(book);
             }
             // this.calculateTotal();
         },
-        addToCourtesyCart(book, variant = null) {
-            const variantId = variant ? variant.id : "no-variant";
-
-            const cartItem = this.courtesyCartItems.find(
-                (item) => item.id === book.id && item.variant_id === variantId
+        addToCourtesyCart(book) {
+            const courtesyCartItem = this.courtesyCartItems.find(
+                (item) => item.id === book.id
             );
-
-            if (cartItem) {
+            if (courtesyCartItem) {
                 Notification.success(
-                    `Item '${cartItem.title}' Qty. has been updated!`
+                    `Courtesy Item quantity '${courtesyCartItem.title}' Qty. has been updated!`
                 );
-                cartItem.courtesy_quantity++;
+                courtesyCartItem.courtesy_quantity++; // If the product already exists, increment its quantity
             } else {
-                Notification.success(`Courtesy Item Added!`);
-                book.discount_amount = 0; // Initialize discount
-                const newItem = {
-                    ...book,
-                    courtesy_quantity: 1,
-                    unit_price: book.price,
-                    variant_id: variantId,
-                };
+                Notification.success(`Item Added to courtesy cart!`);
 
-                if (variant) {
-                    newItem.variant = variant;
-                }
-                this.courtesyCartItems.push(newItem);
+                document.querySelector(
+                    `.addToCourtesyCart${book.id}`
+                ).innerHTML = '<i class="fa fa-check"></i> Added to C. Cart';
+                book.courtesy_quantity = 1;
+                book.unit_price = book.price;
+                this.courtesyCartItems.push(book);
             }
             // this.calculateTotal();
         },
-        removeFromCart(index, variant, cartType = "purchase") {
-            if (index === -1 || !this.cartItems[index]) return; // Ensure the item exists
+        removeFromCart(index) {
+            // Find the index of the item in the cart array
+            // const index = this.cartItems.findIndex(item => item.id === itemId);
 
-            const cartItem = this.cartItems[index];
-
-            const variantId = variant ? variant.id : "no-variant";
-            const bookId = cartItem.id ? cartItem.id : "no-book"; // Safeguard for book
-            const cartKey = `${bookId}-${variantId}-${cartType}`;
-
-            document.querySelector(
-                `.addToCart${cartKey}`
-            ).innerHTML = `<i class="fa fa-check"></i> Add to cart`;
-
-            // Remove the item from the cart array
-            this.cartItems.splice(index, 1);
-
-            // Update UI (you should consider using Vue's reactivity here instead of direct DOM manipulation)
-            Notification.success("Item Removed!");
+            if (index !== -1) {
+                document.querySelector(
+                    `.addToCart${this.cartItems[index].id}`
+                ).innerHTML = '<i class="fa fa-plus"></i> Add To Cart';
+                // Remove the item from the cart array
+                this.cartItems.splice(index, 1);
+                Notification.success(`Item Removed!`);
+                // this.calculateTotal();
+            }
         },
+        removeFromCourtesyCart(index) {
+            // Find the index of the item in the cart array
+            // const index = this.cartItems.findIndex(item => item.id === itemId);
 
-        removeFromCourtesyCart(index, variant, cartType = "courtesy") {
-            if (index === -1 || !this.courtesyCartItems[index]) return; // Ensure the item exists
-
-            const cartItem = this.courtesyCartItems[index];
-
-            const variantId = variant ? variant.id : "no-variant";
-            const bookId = cartItem.id ? cartItem.id : "no-book"; // Safeguard for book
-            const cartKey = `${bookId}-${variantId}-${cartType}`;
-
-            document.querySelector(`.addToCart${cartKey}`).innerHTML =
-                '<i class="fa fa-plus"></i> সৌজন্য কপি';
-            // Remove the item from the cart array
-            this.courtesyCartItems.splice(index, 1);
-            Notification.success(`Item removed from courtesy cart!`);
+            if (index !== -1) {
+                document.querySelector(
+                    `.addToCourtesyCart${this.courtesyCartItems[index].id}`
+                ).innerHTML = '<i class="fa fa-plus"></i> সৌজন্য কপি';
+                // Remove the item from the cart array
+                this.courtesyCartItems.splice(index, 1);
+                Notification.success(`Item removed from courtesy cart!`);
+                // this.calculateTotal();
+            }
         },
         updatePrice(index) {
             // Ensure price is a positive number
@@ -1222,20 +1297,23 @@ export default {
                 this.courtesyCartItems[index].unit_price = 0;
             }
         },
-        updateQuantity(index) {
+        async updateQuantity(index) {
+            const bookId = this.cartItems[index].id;
+            const bookTitle = this.cartItems[index].title;
+            const response = await axios.get(
+                `/api/get-stock-quantity/${bookId}`
+            );
+            const stockQuantity = response.data.stock_quantity;
+            if (stockQuantity < this.cartItems[index].quantity) {
+                Notification.error(
+                    `Item '${bookTitle}' insufficient stock quantity! available stock:${stockQuantity}`
+                );
+                this.cartItems[index].quantity = stockQuantity;
+            }
             // Ensure quantity is a positive number
             if (this.cartItems[index].quantity < 1) {
                 this.cartItems[index].quantity = 1;
             }
-        },
-        calculateSubTotal(item) {
-            let price = item.unit_price || item.price;
-            let quantity = item.courtesy_quantity || item.quantity;
-            let discount_amount = item.discount_amount || 0;
-            return price * quantity - discount_amount;
-        },
-        updateTotal(item) {
-            item.total = this.calculateSubTotal(item);
         },
         updateCourtesyQuantity(index) {
             // Ensure quantity is a positive number
@@ -1244,50 +1322,54 @@ export default {
             }
         },
         updateDiscount() {
-            this.form.discount_percentage = Math.min(
-                100,
-                Math.max(0, Number(this.form.discount_percentage) || 0)
-            );
+            // Ensure discountPercentage is within a valid range (e.g., between 0 and 100)
+            if (this.discountPercentage < 0) {
+                this.discountPercentage = 0;
+            } else if (this.discountPercentage > 100) {
+                this.discountPercentage = 100;
+            }
         },
         updateVat() {
-            this.form.vat_percentage = Math.min(
-                100,
-                Math.max(0, Number(this.form.vat_percentage) || 0)
-            );
+            // Ensure vatPercentage is within a valid range (e.g., between 0 and 100)
+            if (this.vatPercentage < 0) {
+                this.vatPercentage = 0;
+            } else if (this.vatPercentage > 100) {
+                this.vatPercentage = 100;
+            }
         },
         updatePayAmount() {
             const netTotal = this.calculateNetTotal();
-            this.form.pay_amount = Math.min(
-                netTotal,
-                Math.max(0, Number(this.form.pay_amount) || 0)
-            );
+            if (this.payAmount < 0) {
+                this.payAmount = 0;
+            } else if (this.payAmount > netTotal) {
+                this.payAmount = netTotal;
+            }
+        },
+        updateShippingCost() {
+            this.calculateNetTotal();
+            if (this.form.shipping_amount < 0) {
+                this.form.shipping_amount = 0;
+            }
         },
         calculateDiscountAmount() {
             const totalBeforeDiscount = this.calculateTotal();
             const discountAmount =
-                (totalBeforeDiscount * this.form.discount_percentage) / 100;
+                (totalBeforeDiscount * this.discountPercentage) / 100;
+            this.form.discount_percentage = this.discountPercentage;
             this.form.discount_amount = discountAmount;
+            // const totalAfterDiscount = totalBeforeDiscount - discountAmount;
             return discountAmount.toFixed(2);
         },
         calculateVatAmount() {
             const totalBeforeDiscount = this.calculateTotal();
-            const vatPercentage = Number(this.form.vat_percentage) || 0;
-            // Ensure vat percentage is within 0-100 range
-            this.form.vat_percentage = Math.min(
-                100,
-                Math.max(0, vatPercentage)
-            );
-
-            const vatAmount =
-                (totalBeforeDiscount * this.form.vat_percentage) / 100;
-            this.form.vat_amount = parseFloat(vatAmount.toFixed(2)); // Ensures number format
-
-            return this.form.vat_amount;
+            const vatAmount = (totalBeforeDiscount * this.vatPercentage) / 100;
+            this.form.vat_percentage = this.vatPercentage;
+            this.form.vat_amount = vatAmount;
+            return vatAmount.toFixed(2);
         },
         calculateTotal() {
             return this.cartItems.reduce((total, item) => {
-                const discountAmount = Number(item.discount_amount) || 0;
-                const res = total + item.price * item.quantity - discountAmount;
+                const res = total + item.price * item.quantity;
                 this.form.total_amount = res;
                 return res;
             }, 0);
@@ -1301,45 +1383,44 @@ export default {
         },
         calculateNetTotal() {
             const totalBeforeDiscount = this.calculateTotal();
-            const discountPercentage =
-                Number(this.form.discount_percentage) || 0;
             const discountAmount =
-                (totalBeforeDiscount * discountPercentage) / 100;
+                (totalBeforeDiscount * this.discountPercentage) / 100;
             const totalAfterDiscount = totalBeforeDiscount - discountAmount;
-            const vatAmount =
-                (totalAfterDiscount * this.form.vat_percentage) / 100;
-            const totalWithVAT = totalAfterDiscount + vatAmount;
-            this.form.net_amount = totalWithVAT;
-            return totalWithVAT.toFixed(2);
+            const vatAmount = (totalAfterDiscount * this.vatPercentage) / 100;
+            const totalWithVATShippingCost =
+                totalAfterDiscount + vatAmount + this.form.shipping_amount;
+            this.form.net_amount = totalWithVATShippingCost;
+            return totalWithVATShippingCost.toFixed(2);
         },
         dueAmount() {
             const netAmount = this.calculateNetTotal();
-            const payAmount = Number(this.form.pay_amount) || 0;
-            const dueAmount = netAmount - payAmount;
+            const dueAmount = netAmount - this.payAmount;
+            this.form.pay_amount = this.payAmount;
             this.form.due_amount = dueAmount;
             return dueAmount.toFixed(2);
         },
         async submitForm() {
             this.isSubmitting = true;
-            console.log(this.form);
             // console.log(this.form.cartItems);
             if (this.isNew) {
                 try {
                     const payload = {
-                        ...this.form, // Spread other form fields
                         cart_items: this.cartItems,
                         courtesy_cart_items: this.courtesyCartItems,
+                        ...this.form, // Spread other form fields
                     };
 
                     // Make the POST request with the correct data structure
-                    await axios.post("/api/purchases", payload);
+                    await axios.post("/api/sales", payload);
 
                     // Navigate and notify
-                    this.$router.push({ name: "purchases" });
-                    Notification.success("Created purchase successfully!");
+                    this.$router.push({ name: "sales" });
+                    Notification.success("Created sale successfully!");
                 } catch (error) {
                     // Log error response to debug
                     if (error.response && error.response.data) {
+                        this.errors = error.response.data.errors;
+
                         console.error("Error:", error.response.data.errors);
                         Notification.error(
                             "Failed to create sale. Check your input."
@@ -1354,7 +1435,7 @@ export default {
             } else {
                 try {
                     await this.form
-                        .post(`/api/purchases/${this.$route.params.id}`, {
+                        .post(`/api/sales/${this.$route.params.id}`, {
                             params: {
                                 cart_items: this.cartItems,
                                 courtesy_cart_items: this.courtesyCartItems,
@@ -1362,8 +1443,8 @@ export default {
                             },
                         })
                         .then((response) => {
-                            Notification.success("purchase info updated");
-                            this.$router.push("/purchases");
+                            Notification.success("sale info updated");
+                            this.$router.push("/sales");
                         })
                         .catch((error) => {
                             Notification.error(error);
@@ -1378,14 +1459,25 @@ export default {
             }
         },
         resetData() {
-            this.form.clear();
-            this.form.reset();
+            this.clearAllErrors();
+        },
+        clearError(fieldName) {
+            if (this.errors && this.errors[fieldName]) {
+                delete this.errors[fieldName];
+            }
+        },
+        clearAllErrors() {
+            this.errors = {}; // Clear all errors
         },
     },
 };
 </script>
 
 <style type="text/css" scoped>
+td {
+    padding: 1px;
+    font-size: 12px;
+}
 ul {
     list-style-type: none;
     margin: 0;
